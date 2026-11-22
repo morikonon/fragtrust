@@ -106,7 +106,10 @@ def _status(args: argparse.Namespace) -> None:
                 "analysed": (run.path / "analysis" / "trust.json").exists(),
             }
         )
-    print(pd.DataFrame(rows).to_string(index=False) if rows else f"no runs under {args.results / 'runs'}")
+    if not rows:
+        print(f"no runs under {args.results / 'runs'}")
+        return
+    print(pd.DataFrame(rows).astype({"epoch": "Int64"}).to_string(index=False))
 
 
 def _benchmark(args: argparse.Namespace) -> None:

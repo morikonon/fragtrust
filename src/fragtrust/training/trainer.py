@@ -11,6 +11,7 @@ import csv
 import logging
 import math
 import time
+from contextlib import nullcontext
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any
@@ -37,7 +38,7 @@ class TrainConfig:
     amp: bool = True
     compile: bool = False
     resident: Any = "auto"
-    eval_batch_size: int = 4096
+    eval_batch_size: int = 1024
     log_every: int = 500
 
     @classmethod
@@ -124,7 +125,7 @@ def _train_epoch(net, batches: BlockBatches, opt, sched, cfg: TrainConfig, amp: 
     seen = 0
     t0 = time.perf_counter()
     for step, (xb, yb) in enumerate(batches, 1):
-        with torch.autocast(device.type, dtype=torch.bfloat16, enabled=amp):
+        with torch.autocast("cuda", dtype=torch.bfloat16) if amp else nullcontext():
             logits = net(xb)
         loss = F.cross_entropy(logits.float(), yb)
         opt.zero_grad(set_to_none=True)
@@ -160,7 +161,7 @@ def evaluate(net: nn.Module, batches: BlockBatches) -> tuple[float, float]:
 
 
 @torch.no_grad()
-def predict_logits(model: nn.Module, x: np.ndarray, device: torch.device, batch_size: int = 4096) -> np.ndarray:
+def predict_logits(model: nn.Module, x: np.ndarray, device: torch.device, batch_size: int = 1024) -> np.ndarray:
     """fp32 logits for every row of `x` (memory-mapped arrays are read sequentially)."""
     model.eval()
     parts = []

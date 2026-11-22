@@ -16,3 +16,4 @@ train:
   warmup_epochs: 1
   patience: 5
   log_every: 500
+  eval_batch_size: 512

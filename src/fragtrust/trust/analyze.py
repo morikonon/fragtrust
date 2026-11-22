@@ -150,10 +150,11 @@ def analyze(run_path: Path, opts: AnalysisOptions = AnalysisOptions()) -> dict[s
     write_json(out / "trust.json", report)
     cal = report["calibration"]
     sel = report["selective"]["msp"]["targets"][f"{max(opts.targets):.2f}"]["ltt"]
+    selective_acc = "n/a" if sel["selective_accuracy"] is None else f"{sel['selective_accuracy']:.4f}"
     log.info(
-        "%s | ECE %.4f -> %.4f | coverage at %.0f%% target %.3f (acc %s) | %s coverage %.4f, mean size %.2f",
+        "%s | ECE %.4f -> %.4f | coverage at %.0f%% target %.3f (accuracy %s) | %s coverage %.4f, mean size %.2f",
         run.id, cal["uncalibrated"]["ece"], cal["temperature_scaled"]["ece"], 100 * max(opts.targets),
-        sel["coverage"], sel["selective_accuracy"], opts.main_conformal,
+        sel["coverage"], selective_acc, opts.main_conformal,
         report["conformal"][opts.main_conformal]["coverage"], report["conformal"][opts.main_conformal]["mean_size"],
     )
     return report

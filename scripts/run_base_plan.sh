@@ -3,6 +3,7 @@
 # so after any crash simply run this script again.
 source "$(dirname "$0")/_common.sh"
 mkdir -p results/logs
+exec > >(tee -a results/logs/base_plan.log) 2>&1
 
 ft env
 ft prepare --config configs/data/fft75_4096_s1_v1.yaml

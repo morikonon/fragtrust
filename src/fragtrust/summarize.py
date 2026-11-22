@@ -83,6 +83,6 @@ def _markdown(by_model: pd.DataFrame, metrics: list[str]) -> str:
     header = ["model", "runs", *metrics]
     lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
     for model, row in by_model.iterrows():
-        cells = [str(model), str(row["n_runs"])] + [_cell(row[m], row[f"{m}_std"], m) for m in metrics]
+        cells = [str(model), str(int(row["n_runs"]))] + [_cell(row[m], row[f"{m}_std"], m) for m in metrics]
         lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines) + "\n"
