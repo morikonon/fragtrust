@@ -1,0 +1,22 @@
+results: results
+out_dir: paper
+dataset: fft75_4096_s1_v1
+groups: configs/data/fft75_groups.yaml
+models:
+  lgbm: LightGBM
+  cnn_m: CNN
+  transformer: Transformer
+  cnn_m_ens: CNN ensemble
+capacity:
+  cnn_s: CNN-S
+  cnn_m: CNN-M
+  cnn_l: CNN-L
+benchmark_host: null
+shap_run: lgbm_s0
+case_study:
+  image: fat32_1g
+  run: cnn_m_s0
+  runs:
+    lgbm_s0: LightGBM
+    cnn_m_s0: CNN
+    transformer_s0: Transformer

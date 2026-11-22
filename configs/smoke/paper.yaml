@@ -1,0 +1,18 @@
+results: results_smoke
+out_dir: results_smoke/paper
+dataset: synthetic
+models:
+  smoke_lgbm: LightGBM
+  smoke_cnn: CNN
+  smoke_transformer: Transformer
+  smoke_cnn_ens: CNN ensemble
+capacity:
+  smoke_cnn: CNN
+  smoke_transformer: Transformer
+shap_run: smoke_lgbm_s0
+case_study:
+  image: smoke_case
+  run: smoke_cnn_s0
+  runs:
+    smoke_lgbm_s0: LightGBM
+    smoke_cnn_s0: CNN

@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import torch
-from helpers import make_store
+from helpers import CNN, cnn_config, lgbm_config, make_store
 
 from fragtrust.config import RunDir
 from fragtrust.experiment import ensemble, train
@@ -15,37 +15,14 @@ from fragtrust.training.batches import BlockBatches
 from fragtrust.training.trainer import TrainConfig, fit
 from fragtrust.trust.analyze import analyze
 
-CNN = {"type": "cnn", "emb_dim": 8, "channels": [16, 16], "kernel_size": 5, "pool": 8}
-
-
-def _cnn_config(data_dir):
-    return {
-        "name": "cnn",
-        "device": "cpu",
-        "data": {"dir": str(data_dir)},
-        "model": CNN,
-        "train": {"epochs": 2, "batch_size": 32, "lr": 3e-3, "warmup_epochs": 0.5, "eval_batch_size": 128, "log_every": 1000},
-    }
-
-
-def _lgbm_config(data_dir):
-    return {
-        "name": "lgbm",
-        "data": {"dir": str(data_dir)},
-        "model": {"type": "lightgbm"},
-        "params": {"num_leaves": 7, "learning_rate": 0.2, "min_data_in_leaf": 5},
-        "boost": {"num_boost_round": 30, "early_stopping": 10, "log_every": 100},
-        "threads": 1,
-    }
-
 
 def test_full_pipeline(tmp_path):
     data_dir = tmp_path / "data"
     make_store(data_dir)
     results = tmp_path / "results"
     for seed in (0, 1):
-        train(_cnn_config(data_dir), seed, results)
-    train(_lgbm_config(data_dir), 0, results)
+        train(cnn_config(data_dir), seed, results)
+    train(lgbm_config(data_dir), 0, results)
     ensemble([results / "runs" / "cnn_s0", results / "runs" / "cnn_s1"], "cnn_ens", results)
 
     for run_id in ("cnn_s0", "cnn_s1", "lgbm_s0", "cnn_ens"):
@@ -61,7 +38,7 @@ def test_full_pipeline(tmp_path):
     assert by_model.loc["cnn", "n_runs"] == 2
     assert pd.read_csv(results / "summary" / "runs.csv").shape[0] == 4
 
-    train(_cnn_config(data_dir), 0, results)
+    train(cnn_config(data_dir), 0, results)
     assert len(pd.read_csv(results / "runs" / "cnn_s0" / "history.csv")) == 2
 
 

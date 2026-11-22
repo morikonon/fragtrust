@@ -1,0 +1,9 @@
+# Our coarse grouping of the 75 FFT-75 scenario-1 classes, used only for figure layout and colour.
+image: [jpg, arw, cr2, dng, gpr, nef, nrw, orf, pef, raf, rw2, 3fr, tiff, heic, bmp, gif, png, ai, eps, psd]
+video: [mov, mp4, 3gp, avi, mkv, ogv, webm]
+archive: [apk, jar, msi, dmg, 7z, bz2, deb, gz, pkg, rar, rpm, xz, zip]
+executable: [exe, mach-o, elf, dll]
+document: [doc, docx, key, ppt, pptx, xls, xlsx, djvu, epub, mobi, pdf]
+text: [md, rtf, txt, tex, json, html, xml, log, csv]
+audio: [aiff, flac, m4a, mp3, ogg, wav, wma]
+other: [pcap, ttf, dwg, sqlite]

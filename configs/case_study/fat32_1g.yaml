@@ -1,0 +1,12 @@
+name: fat32_1g
+files_dir: data/case_study/files
+out_dir: data/case_study/images/fat32_1g
+class_names: configs/data/fft75_s1_classes.json
+n_classes: 75
+size_mb: 1024
+cluster_size: 4096
+volume_label: EVIDENCE
+seed: 0
+filler_kb: [32, 512]
+tail_mb: 64
+keep_preformat: true

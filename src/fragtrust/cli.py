@@ -117,7 +117,70 @@ def _benchmark(args: argparse.Namespace) -> None:
 
     setup_logging()
     for run in args.runs:
-        benchmark(run, args.results, args.n_blocks, args.threads)
+        benchmark(run, args.results, args.n_blocks, args.threads, args.backend)
+
+
+def _explain(args: argparse.Namespace) -> None:
+    from .explain import explain
+
+    setup_logging()
+    for run in args.runs:
+        explain(run, args.per_class)
+
+
+def _case_build(args: argparse.Namespace) -> None:
+    from .case_study.build import build_image
+    from .config import load_config
+    from .data.prepare import load_class_names
+
+    cfg = load_config(args.config)
+    setup_logging(Path(cfg["out_dir"]) / "build.log")
+    build_image(cfg, load_class_names(cfg["class_names"], cfg["n_classes"])[0])
+
+
+def _case_simulate(args: argparse.Namespace) -> None:
+    from .case_study.simulate import simulate_image
+
+    setup_logging()
+    print(f"simulated image written to {simulate_image(args.data, args.out, args.name, seed=args.seed)}")
+
+
+def _case_scan(args: argparse.Namespace) -> None:
+    from .case_study.scan import scan
+
+    setup_logging()
+    for run in args.runs:
+        scan(run, args.image, args.results, args.device, args.force)
+
+
+def _case_eval(args: argparse.Namespace) -> None:
+    from .case_study.evaluate import evaluate_case
+
+    setup_logging()
+    for run in args.runs:
+        evaluate_case(run, args.image, args.results, args.cal_fraction, args.splits, args.seed)
+
+
+def _report(args: argparse.Namespace) -> None:
+    from .report import build_assets
+
+    setup_logging()
+    build_assets(args.config)
+
+
+def _numbers(args: argparse.Namespace) -> None:
+    from .report.numbers import check
+
+    result = check(args.draft, args.root)
+    out = args.out or args.draft.with_suffix(".rendered.md")
+    out.write_text(result.rendered)
+    print(f"{result.resolved} tags resolved -> {out}")
+    for warning in result.untagged:
+        print(f"untagged number, check by hand: {warning}")
+    for error in result.errors:
+        print(f"ERROR {error}")
+    if result.errors:
+        raise SystemExit(1)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -156,7 +219,46 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("runs", type=Path, nargs="+")
     p.add_argument("--n-blocks", type=int, default=20000)
     p.add_argument("--threads", type=int, nargs="+", default=[1, os.cpu_count() or 1])
+    p.add_argument("--backend", choices=("onnx", "torch"), default="onnx", help="for networks; LightGBM always uses its own")
     p.set_defaults(func=_benchmark)
+
+    p = sub.add_parser("explain", parents=[common], help="TreeSHAP attributions of a LightGBM run")
+    p.add_argument("runs", type=Path, nargs="+")
+    p.add_argument("--per-class", type=int, default=20)
+    p.set_defaults(func=_explain)
+
+    image = argparse.ArgumentParser(add_help=False)
+    image.add_argument("--image", type=Path, required=True, help="image directory (image.img, ground_truth.csv, build.json)")
+    sub.add_parser("case-build", parents=[config], help="build the formatted FAT32 evidence image (Linux)").set_defaults(func=_case_build)
+
+    p = sub.add_parser("case-simulate", help="simulated image from a processed dataset, for smoke tests")
+    p.add_argument("--data", type=Path, required=True)
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--name", default="simulated")
+    p.add_argument("--seed", type=int, default=0)
+    p.set_defaults(func=_case_simulate)
+
+    p = sub.add_parser("case-scan", parents=[common, image, force], help="classify every cluster of the image")
+    p.add_argument("runs", type=Path, nargs="+")
+    p.add_argument("--device", default="auto")
+    p.set_defaults(func=_case_scan)
+
+    p = sub.add_parser("case-eval", parents=[common, image], help="guarantees on the image, carver baseline, recalibration")
+    p.add_argument("runs", type=Path, nargs="+")
+    p.add_argument("--cal-fraction", type=float, default=0.2)
+    p.add_argument("--splits", type=int, default=20)
+    p.add_argument("--seed", type=int, default=0)
+    p.set_defaults(func=_case_eval)
+
+    p = sub.add_parser("report", help="all paper figures and tables")
+    p.add_argument("--config", type=Path, default=Path("configs/paper.yaml"))
+    p.set_defaults(func=_report)
+
+    p = sub.add_parser("numbers", help="resolve {{file:key|format}} tags in the draft and list untagged numbers")
+    p.add_argument("draft", type=Path)
+    p.add_argument("--root", type=Path, default=Path("."))
+    p.add_argument("--out", type=Path)
+    p.set_defaults(func=_numbers)
     return parser
 
 

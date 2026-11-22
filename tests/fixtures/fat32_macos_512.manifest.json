@@ -1,0 +1,82 @@
+{
+ "README.TXT": {
+  "size": 255336,
+  "sha256": "61076d25c53f8f4efca28681f1c2230b94c408dcec5606282f84f47644486744"
+ },
+ "a long file name with spaces 07.txt": {
+  "size": 191451,
+  "sha256": "648231c128600e1ec5200a1372bb22732abac884302b6c1d0d1066827795678a"
+ },
+ "файл_01.txt": {
+  "size": 153829,
+  "sha256": "97c304184b5f202102dbc859055eaceac9a2e2457b18592b880ec450a849fe11"
+ },
+ "SUB/notes.md": {
+  "size": 81666,
+  "sha256": "0e13f94e7451afaf42e897b6f75cd57dd728bb94a8ced0dc268d0cf6126117c7"
+ },
+ "SUB/DEEP/data.csv": {
+  "size": 93040,
+  "sha256": "f05db99e286c74fc15532373a5f776463fccbdaa15b1afe26d1d0ab9a7e17483"
+ },
+ "SUB/DEEP/empty.log": {
+  "size": 0,
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "SUB/part_00.bin": {
+  "size": 13251,
+  "sha256": "76594d48bd20da6234aa3ce7158749f8ab85b46bb3cb79f1d16540d87142cc4e"
+ },
+ "SUB/part_01.bin": {
+  "size": 23496,
+  "sha256": "6e8f62baf5fdf70a86ea6562271ccda746a7310a94dfc9c6b1a739cb25dab3f4"
+ },
+ "SUB/part_02.bin": {
+  "size": 5941,
+  "sha256": "23a039f401a16ee52d76acb04682fb3db2d1d3a7b504d0ae425d3c602a946cbe"
+ },
+ "SUB/part_03.bin": {
+  "size": 53404,
+  "sha256": "7a883be6df6dae72d77d1f60a99d785fb96eac04d107cd5fd4c04f831f412c4a"
+ },
+ "SUB/part_04.bin": {
+  "size": 244167,
+  "sha256": "8a3ca1d8513615ff77f5631bcdfc09b3eac80954c4d246b26a67fbb80c0a0916"
+ },
+ "SUB/part_05.bin": {
+  "size": 195175,
+  "sha256": "e13e8b9a752763ef883ac1d2cad0af593ca0c7642b430f76faf496450e38585b"
+ },
+ "SUB/part_06.bin": {
+  "size": 273913,
+  "sha256": "872fb59163f42d7a4e1535f61eb2ecc0260c9ea08c1d9eee11d262090aaba424"
+ },
+ "SUB/part_07.bin": {
+  "size": 151584,
+  "sha256": "39d638b5948693b5412917d4ebd6dc73b0a71af0c6882d322814313fe5b7d27a"
+ },
+ "SUB/part_08.bin": {
+  "size": 182384,
+  "sha256": "0bc51cd847905657e66082985419195018adccc77c99ccd219b49d025ed53356"
+ },
+ "SUB/part_09.bin": {
+  "size": 291252,
+  "sha256": "d13719e1a13a9772b703782170e3248f595f74aa795a770ba2738a91982c5242"
+ },
+ "SUB/part_10.bin": {
+  "size": 219119,
+  "sha256": "566911c6c2164a248d6beebd3fb7f11af430f2254a459147d54d0418e3dae97b"
+ },
+ "SUB/part_11.bin": {
+  "size": 190048,
+  "sha256": "50333dc76a41255e3ddad0ab24e3aa990f10545f45c3a2981b18709cd4541766"
+ },
+ "SUB/part_12.bin": {
+  "size": 163543,
+  "sha256": "00bb6dc2799d4db2b47545143dbe301773f993cc0af201a4970a6ff73184c39c"
+ },
+ "SUB/part_13.bin": {
+  "size": 168415,
+  "sha256": "ebcf35c1b31350bafdc6e0dcc1a35447c4290c0c21b1a18927c59b92b70786ed"
+ }
+}
