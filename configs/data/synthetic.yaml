@@ -1,0 +1,11 @@
+name: synthetic
+out_dir: data/processed/synthetic
+seed: 0
+block_size: 4096
+per_class:
+  train: 600
+  val_a: 200
+  val_b: 200
+  test: 300
+probes:
+  n_blocks: 300

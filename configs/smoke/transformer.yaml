@@ -1,0 +1,17 @@
+name: smoke_transformer
+data:
+  dir: data/processed/synthetic
+model:
+  type: transformer
+  patch_size: 64
+  emb_dim: 4
+  d_model: 32
+  n_layers: 1
+  n_heads: 2
+train:
+  epochs: 2
+  batch_size: 64
+  lr: 1.0e-3
+  warmup_epochs: 0.5
+  eval_batch_size: 256
+  log_every: 20

@@ -1,0 +1,17 @@
+name: smoke_cnn
+data:
+  dir: data/processed/synthetic
+model:
+  type: cnn
+  emb_dim: 8
+  channels: [16, 16]
+  kernel_size: 5
+  pool: 8
+train:
+  epochs: 3
+  batch_size: 64
+  lr: 3.0e-3
+  warmup_epochs: 0.5
+  patience: 3
+  eval_batch_size: 256
+  log_every: 20

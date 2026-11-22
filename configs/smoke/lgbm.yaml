@@ -1,0 +1,20 @@
+name: smoke_lgbm
+data:
+  dir: data/processed/synthetic
+model:
+  type: lightgbm
+params:
+  min_data_in_leaf: 10
+  feature_fraction: 0.8
+  bagging_fraction: 0.8
+  bagging_freq: 1
+grid:
+  num_leaves: [15, 31]
+  learning_rate: [0.1]
+tune:
+  train_per_class: 300
+boost:
+  num_boost_round: 200
+  early_stopping: 20
+  log_every: 20
+threads: 2

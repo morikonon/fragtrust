@@ -1,0 +1,18 @@
+name: fft75_4096_s1_v1
+out_dir: data/processed/fft75_4096_s1_v1
+seed: 2026
+block_size: 4096
+n_classes: 75
+class_names: configs/data/fft75_s1_classes.json
+raw:
+  train: data/raw/4k_1/train.npz
+  val: data/raw/4k_1/val.npz
+  test: data/raw/4k_1/test.npz
+subset:
+  train_per_class: 20000
+  val_per_class: 4000
+  test_per_class: null
+probes:
+  n_blocks: 20000
+chunk_rows: 32768
+hash_raw: true

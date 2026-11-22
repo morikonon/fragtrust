@@ -1,0 +1,18 @@
+name: cnn_m
+data:
+  dir: data/processed/fft75_4096_s1_v1
+model:
+  type: cnn
+  emb_dim: 32
+  channels: [64, 128, 128, 256]
+  kernel_size: 9
+  pool: 4
+  dropout: 0.1
+train:
+  epochs: 30
+  batch_size: 512
+  lr: 2.0e-3
+  weight_decay: 0.05
+  warmup_epochs: 1
+  patience: 5
+  log_every: 500
