@@ -6,6 +6,9 @@ __pycache__/
 
 data/*
 !data/README.md
+!data/case_study/
+data/case_study/*
+!data/case_study/README.md
 
 results_smoke/
 results/**/*.npy

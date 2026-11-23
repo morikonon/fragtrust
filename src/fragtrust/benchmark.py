@@ -2,8 +2,8 @@
 
 Backends: `onnx` (ONNX Runtime, the deployment runtime; needs the `bench` extra), `torch` (PyTorch
 eager, depends on how PyTorch was built for the machine), and LightGBM for the boosting model.
-Feature extraction is included in the LightGBM time. Results go to
-results/benchmarks/<host>/<run>.<backend>.json.
+Feature extraction is included in the LightGBM time. Every run is measured in a fresh process.
+Results go to results/benchmarks/<host>/<run>.<backend>.json; an existing result is kept unless forced.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ import numpy as np
 from .config import RunDir
 from .data.store import FragmentStore
 from .inference import load_booster, load_net
-from .runtime import hardware_info, setup_logging, write_json
+from .runtime import hardware_info, in_fresh_process, read_json, setup_logging, write_json
 
 log = logging.getLogger(__name__)
 
@@ -88,7 +88,9 @@ def _peak_rss_mb() -> float:
     return peak / 2**20 if sys.platform == "darwin" else peak / 2**10
 
 
-def benchmark(run_path: Path, results: Path, n_blocks: int, threads: list[int], backend: str = "onnx") -> dict[str, Any]:
+def benchmark(
+    run_path: Path, results: Path, n_blocks: int, threads: list[int], backend: str = "onnx", force: bool = False
+) -> dict[str, Any]:
     run = RunDir(run_path)
     cfg = run.config()
     if "members" in cfg:
@@ -97,7 +99,18 @@ def benchmark(run_path: Path, results: Path, n_blocks: int, threads: list[int], 
         backend = "lightgbm"
     out = results / "benchmarks" / socket.gethostname()
     setup_logging(out / "benchmark.log")
-    data = FragmentStore(cfg["data"]["dir"])
+    path = out / f"{run.id}.{backend}.json"
+    if path.exists() and not force:
+        log.info("%s [%s]: benchmark exists, skipping (use --force)", run.id, backend)
+        return read_json(path)
+    result = in_fresh_process(_measure, run.path, n_blocks, threads, backend, log_file=out / "benchmark.log")
+    write_json(path, result)
+    return result
+
+
+def _measure(run_path: Path, n_blocks: int, threads: list[int], backend: str) -> dict[str, Any]:
+    run = RunDir(run_path)
+    data = FragmentStore(run.config()["data"]["dir"])
     x = np.array(data.x("test")[:n_blocks])
     factory = {"torch": _torch_runner, "onnx": _onnx_runner, "lightgbm": _lightgbm_runner}[backend](run, data.block_size)
 
@@ -124,7 +137,7 @@ def benchmark(run_path: Path, results: Path, n_blocks: int, threads: list[int], 
             "minutes_per_256gb": round(256e9 / bytes_per_s / 60, 1),
         })
         log.info("%s [%s] | %d threads | %.1f MB/s | 32 GB in %.1f min", run.id, backend, t, rows[-1]["mb_per_s"], rows[-1]["minutes_per_32gb"])
-    result = {
+    return {
         "run": run.id,
         "backend": backend,
         "n_blocks": len(x),
@@ -135,5 +148,3 @@ def benchmark(run_path: Path, results: Path, n_blocks: int, threads: list[int], 
         "peak_rss_mb": round(_peak_rss_mb(), 1),
         "hardware": hardware_info(),
     }
-    write_json(out / f"{run.id}.{backend}.json", result)
-    return result

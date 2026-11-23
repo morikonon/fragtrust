@@ -18,7 +18,7 @@ from matplotlib.transforms import blended_transform_factory
 
 from ..case_study.evaluate import ABSTAINED, WRONG
 from .collect import Results, load_groups
-from .style import AXIS, CATEGORICAL, EMPTY, INK, INK_2, MUTED, SERIES, MARKERS, TEXT_WIDTH, model_styles, save
+from .style import AXIS, CATEGORICAL, EMPTY, INK_2, MARKERS, MUTED, SERIES, TEXT_WIDTH, model_styles, save
 
 
 @dataclass

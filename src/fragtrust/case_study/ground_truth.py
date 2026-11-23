@@ -21,8 +21,14 @@ def read_overrides(files_dir: Path) -> dict[str, str]:
     path = files_dir / "labels.csv"
     if not path.exists():
         return {}
-    with open(path, newline="") as f:
-        return {row["path"]: row["label"] for row in csv.DictReader(f)}
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        rows = [[cell.strip() for cell in row] for row in csv.reader(f) if any(cell.strip() for cell in row)]
+    if not rows or rows[0] != ["path", "label"]:
+        raise ValueError(f"{path}: the first line must be exactly 'path,label' (comma-separated)")
+    bad = [i for i, row in enumerate(rows[1:], 2) if len(row) != 2 or not all(row)]
+    if bad:
+        raise ValueError(f"{path}: lines {bad} must hold a path and a label separated by one comma")
+    return dict(rows[1:])
 
 
 def label_for(relative_path: str, class_names: set[str], overrides: dict[str, str]) -> str:

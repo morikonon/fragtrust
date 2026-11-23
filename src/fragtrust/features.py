@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import time
 from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import get_context
 from pathlib import Path
 
 import numpy as np
@@ -93,7 +94,8 @@ def extract_file(npy_path: Path, workers: int | None = None, chunk_rows: int = 2
         for a, b in zip(starts, stops):
             out[a:b] = _extract_rows(str(npy_path), a, b)
     else:
-        with ProcessPoolExecutor(workers) as pool:
+        # spawn, not fork: by now this process may hold LightGBM's OpenMP threads, which a forked child inherits broken
+        with ProcessPoolExecutor(workers, mp_context=get_context("spawn")) as pool:
             parts = pool.map(_extract_rows, [str(npy_path)] * len(starts), starts, stops, chunksize=4)
             for a, b, part in zip(starts, stops, parts):
                 out[a:b] = part

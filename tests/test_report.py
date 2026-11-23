@@ -7,10 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 import yaml
+from helpers import transformer_config
 
 from fragtrust.benchmark import benchmark
 from fragtrust.config import RunDir
 from fragtrust.data.store import FragmentStore
+from fragtrust.experiment import train
 from fragtrust.features import N_FEATURES
 from fragtrust.inference import load_booster
 from fragtrust.report import build_assets
@@ -43,10 +45,14 @@ def test_benchmark_writes_throughput(trained, tmp_path, run_id, backend):
     assert len(list((tmp_path / "benchmarks").glob(f"*/{run_id}.{backend}.json"))) == 1
 
 
-def test_onnx_export_matches_pytorch(trained, tmp_path):
+@pytest.mark.parametrize("model", ["cnn", "transformer"])
+def test_onnx_export_matches_pytorch(trained, tmp_path, model):
     pytest.importorskip("onnx")
     pytest.importorskip("onnxruntime")
-    result = benchmark(trained.run("cnn_s0"), tmp_path, n_blocks=64, threads=[1], backend="onnx")
+    if model == "transformer":
+        train(transformer_config(trained.data), 0, tmp_path)
+    run = trained.run("cnn_s0") if model == "cnn" else tmp_path / "runs" / "transformer_s0"
+    result = benchmark(run, tmp_path, n_blocks=64, threads=[1], backend="onnx")
     assert result["onnx_vs_torch_max_abs_diff"] < 1e-3
 
 

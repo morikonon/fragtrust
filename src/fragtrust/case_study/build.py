@@ -110,6 +110,9 @@ def build_image(cfg: dict[str, Any], class_names: list[str]) -> Path:
     if not sources:
         raise FileNotFoundError(f"no evidence files in {files_dir}")
     overrides = read_overrides(files_dir)
+    stray = sorted(set(overrides) - {p.relative_to(files_dir).as_posix() for p in sources})
+    if stray:
+        raise ValueError(f"labels.csv names {len(stray)} file(s) not found under {files_dir}: {stray[:5]}")
     names = set(class_names)
     evidence = []
     for i, j in enumerate(rng.permutation(len(sources))):
@@ -126,7 +129,8 @@ def build_image(cfg: dict[str, Any], class_names: list[str]) -> Path:
             }
         )
     total = sum(e["size"] for e in evidence)
-    log.info("%d evidence files, %.1f MB", len(evidence), total / 2**20)
+    labels = pd.Series([e["label"] for e in evidence]).value_counts()
+    log.info("%d evidence files, %.1f MB; labels: %s", len(evidence), total / 2**20, ", ".join(f"{k} {v}" for k, v in labels.items()))
 
     mkfs_out = _mkfs(tools["mkfs"], image, cfg, create=True)
     n_fillers = _write_fillers(tools, image, cfg, rng)

@@ -2,7 +2,8 @@
 
 Experiments for a study of trustworthy file fragment classification (ICECC 2027, Special Session 7):
 how honest the confidence of FFT-75 classifiers is, what accuracy an examiner can be guaranteed when
-the model may abstain, and what the models do with encrypted or random data they never saw.
+the model may abstain, what the models do with encrypted or random data they never saw, and whether
+the guarantees survive on a realistic exhibit (a quick-formatted FAT32 USB image).
 
 | ID | Model | Size |
 |---|---|---|
@@ -14,28 +15,37 @@ The trust analysis runs on saved logits (CPU only): temperature scaling; ECE, NL
 risk–coverage, AURC and accuracy-targeted abstention thresholds with a Learn-then-Test guarantee;
 conformal prediction sets (LAC, APS, RAPS); out-of-distribution probes (AES-CTR ciphertext and random
 bytes); accuracy by block entropy; exact-duplicate blocks between the official train and test splits.
+On top of that: TreeSHAP attributions of the LightGBM model, CPU throughput with ONNX Runtime, and the
+case study (every cluster of a formatted FAT32 image classified, against a header-signature carver,
+with and without recalibration on part of the image).
 
 ## Layout
 
 ```
-configs/data/      dataset build configs (FFT-75 subset, synthetic smoke data)
-configs/models/    paper models
-configs/smoke/     tiny models for the smoke run
-scripts/           server setup, download, full run, smoke run, sync
+configs/data/        dataset build configs (FFT-75 subset, synthetic smoke data, class groups)
+configs/models/      paper models
+configs/smoke/       tiny models and paper config for the smoke run
+configs/case_study/  FAT32 image build config
+configs/paper.yaml   which runs go into which figure and table
+scripts/             server setup, download, base plan, case study, smoke run, sync
 src/fragtrust/
-  data/            streaming .npz reader, subset builder, duplicate check, OOD probes, synthetic data
-  features.py      hand-crafted block features (LightGBM)
-  models/          CNN, transformer, LightGBM
-  training/        GPU batching, training loop with resumable checkpoints
-  trust/           calibration, selective prediction, conformal sets, OOD scores, per-run analysis
-  experiment.py    tune / train / ensemble
-  summarize.py     tables over all runs
-  benchmark.py     CPU throughput
-tests/             pytest (unit tests + end-to-end pipeline + resume check)
-NOTES.md           methodological decisions and their reasons
+  data/              streaming .npz reader, subset builder, duplicate check, OOD probes, synthetic data
+  features.py        hand-crafted block features (LightGBM)
+  models/            CNN, transformer, LightGBM
+  training/          GPU batching, training loop with resumable checkpoints
+  trust/             calibration, selective prediction, conformal sets, OOD scores, per-run analysis
+  case_study/        FAT32 reader, image builder, ground truth, signature carver, scan, evaluation
+  report/            paper figures and tables, number tags for the draft
+  experiment.py      tune / train / ensemble
+  explain.py         TreeSHAP for LightGBM
+  benchmark.py       CPU throughput
+  summarize.py       tables over all runs
+data/case_study/     evidence files and images (README: what to collect and how to build)
+tests/               pytest: unit tests, end-to-end pipeline, resume, case study, report
+NOTES.md             methodological decisions and their reasons
 ```
 
-## 1. Check the code (laptop, a few minutes, synthetic data)
+## 1. Check the code (laptop, synthetic data)
 
 The scripts put `src/` on `PYTHONPATH`, so nothing has to be installed if the dependencies in
 `pyproject.toml` are present.
@@ -44,24 +54,32 @@ The scripts put `src/` on `PYTHONPATH`, so nothing has to be installed if the de
 bash scripts/smoke.sh
 ```
 
+`smoke.sh` runs every step on a 7-class synthetic dataset and writes to `results_smoke/`: training,
+trust analysis, SHAP, the case study on a simulated image, the CPU benchmark (ONNX Runtime if
+installed, otherwise PyTorch) and all paper figures and tables in `results_smoke/paper/`. Rerunning
+skips finished steps; delete `results_smoke/` for a clean run.
+
 ```bash
-python -m pytest
+python -m pytest -rs
 ```
 
-`smoke.sh` runs every step on a 7-class synthetic dataset and writes to `results_smoke/`.
+On macOS two tests are skipped: building a FAT32 image needs dosfstools and mtools (Linux), and the
+ONNX export test needs the `bench` extra (`pip install -e ".[bench]"`).
 
 ## 2. Full run on the GPU server
 
 Needs Linux, one GPU with ≥ 16 GB, ≥ 16 CPU cores, ≥ 64 GB RAM, about 100 GB of disk,
 Python ≥ 3.10 and a CUDA build of PyTorch (a RunPod PyTorch image has one).
 
-Set up the environment, run the tests and record the hardware:
+Set up the environment: system packages (dosfstools, mtools, tmux, wget, as root), a `.venv` that
+reuses the image's PyTorch, the package with the `dev` and `bench` extras, the tests (none should be
+skipped here) and the hardware record. Safe to rerun.
 
 ```bash
 bash scripts/setup_server.sh
 ```
 
-Run the smoke pipeline once on the GPU (exercises bf16 training and GPU-resident data):
+Run the smoke pipeline once on the GPU (exercises bf16 training, GPU-resident data and GPU scanning):
 
 ```bash
 bash scripts/smoke.sh
@@ -85,10 +103,13 @@ tmux new -s fft
 bash scripts/run_base_plan.sh
 ```
 
-The script also writes its output to `results/logs/base_plan.log`. Detach with `Ctrl-b d`, reattach
-with `tmux attach -t fft`. Every step skips finished runs and
-resumes unfinished ones from their last epoch, so after a crash or a pod restart run the same
-script again.
+The base plan checks the GPU, the extras and the free disk first, then builds the subset, trains
+LightGBM (5 seeds, on the CPUs in the background) and the networks (CNN-M ×3, CNN-S, CNN-L,
+transformer ×3, on the GPU), builds the CNN-M ensemble, runs the trust analysis, SHAP and the CPU
+benchmark, and writes the paper figures and tables. Its output also goes to
+`results/logs/base_plan.log`. Detach with `Ctrl-b d`, reattach with `tmux attach -t fft`. Every step
+skips finished work and resumes unfinished runs from their last epoch, so after a crash or a pod
+restart run the same script again.
 
 ### Watching progress
 
@@ -116,10 +137,51 @@ Configure an rclone remote named `gdrive` once (`rclone config`), then:
 bash scripts/sync_results.sh
 ```
 
+## 3. Case study
+
+Collect the evidence files as described in [data/case_study/README.md](data/case_study/README.md)
+(any OS), copy them to `data/case_study/files/` on the server, and after the base plan run:
+
+```bash
+bash scripts/run_case_study.sh
+```
+
+It builds the formatted FAT32 image if it does not exist yet (Linux only; the build verifies every
+file by sha256 and that the format changed no evidence cluster), scans every cluster with LightGBM,
+CNN-M and the transformer, evaluates them and rebuilds the paper assets. Output goes to
+`results/case_study/fat32_1g/`, the log to `results/logs/case_study.log`.
+
+## 4. Paper assets and numbers
+
+```bash
+python -m fragtrust.cli report
+```
+
+reads `configs/paper.yaml` and writes every figure whose inputs exist to `paper/figures/` (SVG and
+600-dpi PNG, 122 mm wide for LNCS), every table to `paper/tables/` (Markdown and CSV), and
+`paper/assets.json` with the result files each asset was built from. Missing inputs skip an asset
+with a log line; nothing else fails. If benchmarks from several hosts exist, set `benchmark_host`
+in `configs/paper.yaml`.
+
+Numbers in the draft are written as tags and resolved from the result files:
+
+```
+accuracy {{results/summary/by_model.csv:cnn_m/accuracy|pct1}}%,
+ECE {{results/runs/cnn_m_s0/analysis/trust.json:calibration/temperature_scaled/ece|.3f}}
+```
+
+```bash
+python -m fragtrust.cli numbers paper/draft.md
+```
+
+writes `paper/draft.rendered.md`, fails on any tag that does not resolve and lists numbers typed by
+hand outside tags. `.Nf` and `pctN` round half up, exactly like the tables.
+
 ## Commands
 
 All commands accept `--results DIR` (default `results`). Run them from the repository root, either as
-`fragtrust ...` after `pip install -e .` or as `python -m fragtrust.cli ...`.
+`fragtrust ...` after `pip install -e .` or as `python -m fragtrust.cli ...`. Commands that write a
+result skip it if it exists; `--force` redoes it.
 
 | Command | What it does |
 |---|---|
@@ -132,27 +194,41 @@ All commands accept `--results DIR` (default `results`). Run them from the repos
 | `analyze [RUN...]` | trust analysis (default: every finished run not yet analysed) |
 | `summarize` | `results/summary/runs.csv`, `by_model.csv`, `by_model.md` (mean ± std over seeds) |
 | `status` | state, epoch and accuracy of every run |
-| `benchmark RUN... --threads 1 8` | CPU throughput, minutes per 32 GB / 256 GB drive |
+| `explain RUN...` | TreeSHAP of a LightGBM run on stratified test blocks → `analysis/shap_*.csv`, `shap.json` |
+| `benchmark RUN... [--threads 1 16] [--backend onnx\|torch]` | CPU throughput, minutes per 32 GB / 256 GB drive; default 1 thread and every available CPU |
+| `case-build --config C` | formatted FAT32 evidence image with block-level ground truth (Linux) |
+| `case-simulate --data D --out O` | simulated image from a processed dataset, for smoke tests only |
+| `case-scan RUN... --image I` | logits for every cluster of the image |
+| `case-eval RUN... --image I` | transferred guarantees, signature baseline, recalibration on 20 % of the files |
+| `report [--config C]` | all paper figures and tables (default `configs/paper.yaml`) |
+| `numbers DRAFT` | resolve number tags in the draft, list untagged numbers |
 
 ## Outputs
 
 ```
 results/
   hardware.json, environment.txt
+  logs/                  base_plan.log, lgbm.out, case_study.log
   data/<dataset>/        prepare.log, manifest.json, class_balance.csv, leakage.json, leakage_per_class.csv
   tuning/lgbm/           tune.log, grid.csv, best.json
   runs/<model>_s<seed>/
     config.yaml          exact config of the run
     meta.json            seed, git commit, hardware, timings, parameter count, model size
     train.log            full log; history.csv: one row per epoch
-    best.pt | model.txt  weights
+    best.pt | model.txt  weights (model.onnx after an ONNX benchmark)
     logits_<split>.npy   val_a, val_b, test, ood_aes_ctr, ood_random
     metrics.json, per_class_test.csv, confusion_test.npy
     analysis/            trust.json, reliability_*.csv, risk_coverage.csv,
-                         conformal_class_coverage.csv, entropy_bins.csv, analyze.log
+                         conformal_class_coverage.csv, entropy_bins.csv, analyze.log;
+                         LightGBM: shap_global.csv, shap_per_class.csv, shap.json
     DONE                 marks a finished run
   summary/               runs.csv, by_model.csv, by_model.md
-  benchmarks/<host>/     <run>.json
+  benchmarks/<host>/     <run>.<backend>.json, benchmark.log
+  case_study/<image>/
+    scans/<run>.npy      logits for every cluster
+    signatures.npz       header matches and propagated carver labels
+    <run>/               case_study.json, per_type.csv, recalibration_splits.csv, disk_map.npz
+paper/                   figures/, tables/, assets.json
 ```
 
 ## Evaluation protocol
@@ -164,10 +240,22 @@ results/
 | val_b (2,000 per class) | abstention thresholds, conformal quantiles |
 | test (official, all blocks) | every reported number, touched once per run |
 | probes | AES-CTR and random blocks, never seen in training |
+| case-study image | transferred thresholds as they are; recalibration on 20 % of the image's files, evaluated on the other 80 % |
+
+## CPU benchmark
+
+The deployment question is whether an examiner can scan a drive on an ordinary computer. Networks
+are exported to ONNX and run with ONNX Runtime, the same runtime on a laptop and a server; the
+export is checked against PyTorch (maximum absolute logit difference, stored in the result).
+LightGBM runs with its own library, feature extraction included. Each model is measured in a fresh
+process, so the peak memory is its own and LightGBM's and PyTorch's OpenMP runtimes never meet. The
+default thread counts are 1 and every CPU the process may use; inside a container that is the cgroup
+CPU limit, not the host's core count.
 
 ## Disk and time
 
 The 4096-byte scenario-1 archive is 24.18 GB (DataPort listing); archive plus extracted files take
 about 50 GB, the processed subset about 10.5 GB, cached LightGBM features about 2.5 GB, and each run's
 logits about 0.25 GB. After `prepare` has finished, the archive can be deleted (its sha256 is recorded).
-Time per epoch is logged after the first epoch; use it to update the GPU-hour budget.
+The case-study image and its pre-format copy take 2 GB. Time per epoch is logged after the first
+epoch; use it to update the GPU-hour budget.

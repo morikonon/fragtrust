@@ -33,6 +33,10 @@ def to_markdown(df: pd.DataFrame) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _with_runs(ctx: Context) -> dict[str, str]:
+    return {m: label for m, label in ctx.models.items() if ctx.results.first(m)}
+
+
 def _models(ctx: Context) -> dict[str, str]:
     models = {m: label for m, label in ctx.models.items() if ctx.results.runs(m)}
     models |= {m: label for m, label in ctx.cfg.get("capacity", {}).items() if ctx.results.runs(m) and m not in models}
@@ -102,7 +106,7 @@ def main_results(ctx: Context) -> Table | None:
 
 
 def calibration(ctx: Context) -> Table | None:
-    models = {m: l for m, l in ctx.models.items() if ctx.results.first(m)}
+    models = _with_runs(ctx)
     if not models:
         return None
     rows = []
@@ -122,7 +126,7 @@ def calibration(ctx: Context) -> Table | None:
 
 
 def selective(ctx: Context) -> Table | None:
-    models = {m: l for m, l in ctx.models.items() if ctx.results.first(m)}
+    models = _with_runs(ctx)
     if not models:
         return None
     rows = []
@@ -143,7 +147,7 @@ def selective(ctx: Context) -> Table | None:
 
 
 def conformal(ctx: Context) -> Table | None:
-    models = {m: l for m, l in ctx.models.items() if ctx.results.first(m)}
+    models = _with_runs(ctx)
     if not models:
         return None
     first = ctx.results.doc(ctx.results.first(next(iter(models))), "trust")["conformal"]
@@ -166,7 +170,7 @@ def conformal(ctx: Context) -> Table | None:
 
 
 def ood(ctx: Context) -> Table | None:
-    models = {m: l for m, l in ctx.models.items() if ctx.results.first(m)}
+    models = _with_runs(ctx)
     if not models:
         return None
     names = {"ood_aes_ctr": "AES-CTR", "ood_random": "random"}

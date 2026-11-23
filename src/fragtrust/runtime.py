@@ -10,15 +10,20 @@ import random
 import socket
 import subprocess
 import sys
+from collections.abc import Callable
 from datetime import datetime, timezone
 from importlib import metadata
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-KEY_PACKAGES = ("numpy", "pandas", "scipy", "scikit-learn", "lightgbm", "torch", "cryptography", "pyyaml")
+T = TypeVar("T")
+KEY_PACKAGES = (
+    "numpy", "pandas", "scipy", "scikit-learn", "lightgbm", "torch", "cryptography", "pyyaml",
+    "matplotlib", "onnx", "onnxruntime",
+)
 
 
 def setup_logging(log_file: Path | None = None) -> logging.Logger:
@@ -38,6 +43,22 @@ def setup_logging(log_file: Path | None = None) -> logging.Logger:
         handler.setFormatter(formatter)
         logger.addHandler(handler)
     return logger
+
+
+def _logged_call(log_file: Path | None, fn: Callable[..., T], args: tuple) -> T:
+    setup_logging(log_file)
+    return fn(*args)
+
+
+def in_fresh_process(fn: Callable[..., T], *args: Any, log_file: Path | None = None) -> T:
+    """fn(*args) in a new interpreter, logging to stdout and `log_file` there too. LightGBM and PyTorch
+    each bring an OpenMP runtime, and using both in one process can deadlock (seen on macOS); a fresh
+    process also makes the peak memory that of this call alone."""
+    from concurrent.futures import ProcessPoolExecutor
+    from multiprocessing import get_context
+
+    with ProcessPoolExecutor(1, mp_context=get_context("spawn")) as pool:
+        return pool.submit(_logged_call, log_file, fn, args).result()
 
 
 def utc_now() -> str:
@@ -93,8 +114,35 @@ def resolve_device(name: str = "auto"):
     return torch.device("cpu")
 
 
+def cgroup_cpu_quota(root: Path = Path("/sys/fs/cgroup")) -> float | None:
+    """CPU limit of the container in CPUs (cgroup v2 or v1), None when unlimited or not in a cgroup."""
+    v2 = root / "cpu.max"
+    v1 = root / "cpu" / "cpu.cfs_quota_us", root / "cpu" / "cpu.cfs_period_us"
+    try:
+        if v2.exists():
+            quota, period = v2.read_text().split()[:2]
+            return None if quota == "max" else int(quota) / int(period)
+        if v1[0].exists():
+            quota, period = int(v1[0].read_text()), int(v1[1].read_text())
+            return quota / period if quota > 0 else None
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def available_cpus() -> int:
+    """CPUs this process may use. Inside a container (RunPod) os.cpu_count() reports every core of the
+    host, so the affinity mask is capped by the cgroup CPU quota; oversubscribed threads run slower."""
+    try:
+        n = len(os.sched_getaffinity(0))
+    except AttributeError:
+        n = os.cpu_count() or 1
+    quota = cgroup_cpu_quota()
+    return max(1, min(n, int(quota))) if quota else n
+
+
 def cpu_threads(requested: int | None = None) -> int:
-    return requested or max(1, (os.cpu_count() or 2) - 1)
+    return requested or max(1, available_cpus() - 1)
 
 
 def _git(*args: str) -> str:
@@ -154,6 +202,7 @@ def hardware_info() -> dict[str, Any]:
         "python": platform.python_version(),
         "cpu": _cpu_model(),
         "cpu_count": os.cpu_count(),
+        "cpus_available": available_cpus(),
         "ram_gb": round(os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 2**30, 1),
         "cuda": torch.version.cuda,
         "mps": torch.backends.mps.is_available(),

@@ -13,7 +13,7 @@ import pytest
 from fragtrust.case_study.build import build_image
 from fragtrust.case_study.evaluate import NONE
 from fragtrust.case_study.fat32 import Fat32
-from fragtrust.case_study.ground_truth import NOT_EVIDENCE, cluster_table
+from fragtrust.case_study.ground_truth import NOT_EVIDENCE, UNKNOWN, cluster_table, label_for, read_overrides
 from fragtrust.case_study.scan import image_blocks
 from fragtrust.case_study.signatures import SIGNATURES, candidate_sets, match_headers, propagate
 from fragtrust.data.prepare import load_class_names
@@ -58,6 +58,21 @@ def test_cluster_table_follows_cluster_chains(fat_image):
         assert rows["fragmented"].all() == (f.fragments > 1)
         assert rows["position"].iloc[0] == ("single" if len(rows) == 1 else "header")
     assert (table.loc[table["file_id"] < 0, "label"] == NOT_EVIDENCE).all()
+
+
+def test_labels_come_from_extension_or_labels_csv(tmp_path):
+    (tmp_path / "labels.csv").write_text("\ufeffpath,label\nvault/c.bin, encrypted\n\n")
+    overrides = read_overrides(tmp_path)
+    assert overrides == {"vault/c.bin": "encrypted"}
+    names = {"jpg", "tiff", "txt"}
+    assert [label_for(p, names, overrides) for p in ("a/IMG.JPEG", "b.tif", "notes", "vault/c.bin")] == ["jpg", "tiff", UNKNOWN, "encrypted"]
+
+
+@pytest.mark.parametrize("text", ["path;label\na.bin;encrypted\n", "path,label\na.bin\n", "file,type\na.bin,encrypted\n"])
+def test_malformed_labels_csv_is_rejected(tmp_path, text):
+    (tmp_path / "labels.csv").write_text(text)
+    with pytest.raises(ValueError, match="labels.csv"):
+        read_overrides(tmp_path)
 
 
 def _block(head: bytes, size: int = 512) -> np.ndarray:

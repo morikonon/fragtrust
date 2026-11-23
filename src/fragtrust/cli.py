@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 from pathlib import Path
 
 from .runtime import setup_logging
@@ -17,7 +16,7 @@ def _env(args: argparse.Namespace) -> None:
     write_json(args.results / "hardware.json", info)
     (args.results / "environment.txt").write_text("\n".join(installed_packages()) + "\n")
     gpus = ", ".join(g["name"] for g in info["gpus"]) or "none"
-    print(f"{info['cpu']} | {info['cpu_count']} cores | {info['ram_gb']} GB RAM | GPU: {gpus}")
+    print(f"{info['cpu']} | {info['cpus_available']} of {info['cpu_count']} cores available | {info['ram_gb']} GB RAM | GPU: {gpus}")
     print(f"written: {args.results / 'hardware.json'}, {args.results / 'environment.txt'}")
 
 
@@ -114,10 +113,12 @@ def _status(args: argparse.Namespace) -> None:
 
 def _benchmark(args: argparse.Namespace) -> None:
     from .benchmark import benchmark
+    from .runtime import available_cpus
 
     setup_logging()
+    threads = sorted(set(args.threads or [1, available_cpus()]))
     for run in args.runs:
-        benchmark(run, args.results, args.n_blocks, args.threads, args.backend)
+        benchmark(run, args.results, args.n_blocks, threads, args.backend, args.force)
 
 
 def _explain(args: argparse.Namespace) -> None:
@@ -125,6 +126,9 @@ def _explain(args: argparse.Namespace) -> None:
 
     setup_logging()
     for run in args.runs:
+        if (run / "analysis" / "shap.json").exists() and not args.force:
+            print(f"{run.name}: SHAP already computed (use --force)")
+            continue
         explain(run, args.per_class)
 
 
@@ -147,10 +151,11 @@ def _case_simulate(args: argparse.Namespace) -> None:
 
 def _case_scan(args: argparse.Namespace) -> None:
     from .case_study.scan import scan
+    from .runtime import in_fresh_process
 
     setup_logging()
     for run in args.runs:
-        scan(run, args.image, args.results, args.device, args.force)
+        in_fresh_process(scan, run, args.image, args.results, args.device, args.force)
 
 
 def _case_eval(args: argparse.Namespace) -> None:
@@ -215,14 +220,14 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("summarize", parents=[common], help="tables over all runs").set_defaults(func=_summarize)
     sub.add_parser("status", parents=[common], help="progress of every run").set_defaults(func=_status)
 
-    p = sub.add_parser("benchmark", parents=[common], help="CPU inference throughput")
+    p = sub.add_parser("benchmark", parents=[common, force], help="CPU inference throughput")
     p.add_argument("runs", type=Path, nargs="+")
     p.add_argument("--n-blocks", type=int, default=20000)
-    p.add_argument("--threads", type=int, nargs="+", default=[1, os.cpu_count() or 1])
+    p.add_argument("--threads", type=int, nargs="+", help="thread counts (default: 1 and every available CPU)")
     p.add_argument("--backend", choices=("onnx", "torch"), default="onnx", help="for networks; LightGBM always uses its own")
     p.set_defaults(func=_benchmark)
 
-    p = sub.add_parser("explain", parents=[common], help="TreeSHAP attributions of a LightGBM run")
+    p = sub.add_parser("explain", parents=[common, force], help="TreeSHAP attributions of a LightGBM run")
     p.add_argument("runs", type=Path, nargs="+")
     p.add_argument("--per-class", type=int, default=20)
     p.set_defaults(func=_explain)

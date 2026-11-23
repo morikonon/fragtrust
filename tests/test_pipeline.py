@@ -51,10 +51,13 @@ def test_interrupted_training_resumes_to_identical_weights(tmp_path):
         out_dir.mkdir()
         seed_everything(0)
         model = build_net(CNN, store.n_classes, store.block_size)
-        batches = lambda: (
-            BlockBatches(store.x("train"), store.y("train"), cfg.batch_size, cpu, shuffle=True, seed=0, drop_last=True),
-            BlockBatches(store.x("val_a"), store.y("val_a"), cfg.eval_batch_size, cpu),
-        )
+
+        def batches():
+            return (
+                BlockBatches(store.x("train"), store.y("train"), cfg.batch_size, cpu, shuffle=True, seed=0, drop_last=True),
+                BlockBatches(store.x("val_a"), store.y("val_a"), cfg.eval_batch_size, cpu),
+            )
+
         if interrupt_at_eval is not None:
             original, calls = trainer.evaluate, []
 

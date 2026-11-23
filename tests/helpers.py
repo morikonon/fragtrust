@@ -8,6 +8,7 @@ from fragtrust.data.store import FragmentStore
 from fragtrust.data.synthetic import make_synthetic
 
 CNN = {"type": "cnn", "emb_dim": 8, "channels": [16, 16], "kernel_size": 5, "pool": 8}
+TRANSFORMER = {"type": "transformer", "patch_size": 64, "emb_dim": 4, "d_model": 32, "n_layers": 1, "n_heads": 2}
 
 
 def make_store(root: Path, block_size: int = 512, per_class: tuple[int, int, int, int] = (60, 30, 30, 30), seed: int = 0) -> FragmentStore:
@@ -31,14 +32,18 @@ def calibrated_sample(n: int, n_classes: int, rng: np.random.Generator) -> tuple
     return p, y
 
 
-def cnn_config(data_dir: Path, name: str = "cnn") -> dict:
+def cnn_config(data_dir: Path, name: str = "cnn", model: dict = CNN, epochs: int = 2) -> dict:
     return {
         "name": name,
         "device": "cpu",
         "data": {"dir": str(data_dir)},
-        "model": CNN,
-        "train": {"epochs": 2, "batch_size": 32, "lr": 3e-3, "warmup_epochs": 0.5, "eval_batch_size": 128, "log_every": 1000},
+        "model": model,
+        "train": {"epochs": epochs, "batch_size": 32, "lr": 3e-3, "warmup_epochs": 0.5, "eval_batch_size": 128, "log_every": 1000},
     }
+
+
+def transformer_config(data_dir: Path, name: str = "transformer") -> dict:
+    return cnn_config(data_dir, name, TRANSFORMER, epochs=1)
 
 
 def lgbm_config(data_dir: Path, name: str = "lgbm") -> dict:
