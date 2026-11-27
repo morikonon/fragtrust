@@ -8,6 +8,33 @@ Status of inputs: no real results yet except CNN-M seed 0 training (about 77 % v
 written yet; every claim that depends on the novelty check is marked [NOVELTY]; every missing
 reference is `[CITE: ...]`.
 
+## W2 update (2026-11-27): what the first full draft changed
+
+The draft is `draft.md` (built from tags; `draft.rendered.md` is the output of `fragtrust numbers`).
+Changes against the W1 plan below:
+- Contributions now use the safe wording of `team/research/novelty.md` §3 (five items: calibration
+  "to our knowledge the first"; LTT + conformal "with guarantees", citing Magika/MimeLens/ByteRCNN;
+  ciphertext probes citing MimeLens; controlled FAT32 image; duplicate count + its small effect).
+  C6 (protocol) became one sentence: "Code ... will be released upon acceptance".
+- Structure: image construction moved from Sect. 5 into Sect. 4.6 (Methods); Sect. 5 is hardware,
+  versions and the benchmark protocol only; new Sect. 6.5 "Duplicated test blocks" (C3 numbers).
+- Supported by CNN-M s0 (tagged): ECE already low (0.010 → 0.005), so C1 may end as "well
+  calibrated; scaling changes little"; empirical thresholds miss 95/99 % on test, LTT meets both;
+  per-type conformal coverage far below target for some types; probes abstained ~100 % but byte
+  entropy AUROC nearly equals MSP; duplicate effect +0.10 pp (small; said so).
+- Provisional numbering: Table 1 dataset, 2 main_results, 3 calibration, 4 selective, 5 conformal,
+  6 ood, 7 case_study, 8 recalibration; Fig. 1 per_class_f1, 2 reliability, 3 risk_coverage,
+  4 entropy, 5 disk_map. Cut already: table `leakage` (in text), table `duplicates` (text only),
+  figure `capacity` and `shap` (one PENDING sentence each). Still at risk for 12 pages: 8 tables +
+  5 figures; next cuts per the priority list below (per_class_f1, then merge calibration+selective).
+- References: 31 entries, numbered by first citation, F/A level only (R2) plus R1 sources; open
+  markers: `[CITE: Sceadan]` (level M, not cited as a reference), MoDiCo venue, `[CHECK]` for
+  pages/volume of Guzhov & Wirth, EnCoD, Sadinle.
+- W1 open questions 1–3 are resolved by C2 (`m_min`, `meets` needs ≥ 1 answer, byte-entropy
+  baseline). Question 4 (case-study `build.json` under `data/`) is still open.
+- New open point: the LTT implementation indexes hypotheses by accepted-set size on val_b, not by a
+  fixed threshold grid; flagged in a comment in Sect. 4.3 for the reviewer/coder.
+
 ## Working title
 
 Main option:

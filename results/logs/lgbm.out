@@ -77,3 +77,15 @@
 2026-11-27 23:13:20 | INFO    | [50]	val_a's multi_logloss: 1.20017	val_a's multi_error: 0.319533
 2026-11-27 23:15:55 | INFO    | [75]	val_a's multi_logloss: 1.12275	val_a's multi_error: 0.31032
 2026-11-27 23:18:31 | INFO    | [100]	val_a's multi_logloss: 1.0837	val_a's multi_error: 0.304353
+2026-11-27 23:24:50 | INFO    | [125]	val_a's multi_logloss: 1.05871	val_a's multi_error: 0.300253
+2026-11-27 23:27:42 | INFO    | [150]	val_a's multi_logloss: 1.04098	val_a's multi_error: 0.29672
+2026-11-27 23:30:22 | INFO    | [175]	val_a's multi_logloss: 1.02743	val_a's multi_error: 0.29456
+2026-11-27 23:33:01 | INFO    | [200]	val_a's multi_logloss: 1.01676	val_a's multi_error: 0.292067
+2026-11-27 23:37:58 | INFO    | [225]	val_a's multi_logloss: 1.00801	val_a's multi_error: 0.29038
+2026-11-27 23:40:34 | INFO    | [250]	val_a's multi_logloss: 1.00084	val_a's multi_error: 0.288833
+2026-11-27 23:43:09 | INFO    | [275]	val_a's multi_logloss: 0.994731	val_a's multi_error: 0.287807
+2026-11-27 23:45:42 | INFO    | [300]	val_a's multi_logloss: 0.989537	val_a's multi_error: 0.286353
+2026-11-27 23:48:14 | INFO    | [325]	val_a's multi_logloss: 0.985333	val_a's multi_error: 0.28506
+2026-11-27 23:50:48 | INFO    | [350]	val_a's multi_logloss: 0.981954	val_a's multi_error: 0.284153
+2026-11-27 23:53:19 | INFO    | [375]	val_a's multi_logloss: 0.978767	val_a's multi_error: 0.283733
+2026-11-27 23:55:50 | INFO    | [400]	val_a's multi_logloss: 0.976158	val_a's multi_error: 0.282893
