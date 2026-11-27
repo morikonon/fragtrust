@@ -48,10 +48,13 @@ stop_lgbm() {
 }
 trap stop_lgbm EXIT
 
-ft train --config configs/models/cnn_m.yaml --seed 0 1 2
+# One seed of each architecture first, so an interrupted plan still covers every model.
+ft train --config configs/models/cnn_m.yaml --seed 0
+ft train --config configs/models/transformer.yaml --seed 0
+ft train --config configs/models/cnn_m.yaml --seed 1 2
 ft train --config configs/models/cnn_s.yaml --seed 0
 ft train --config configs/models/cnn_l.yaml --seed 0
-ft train --config configs/models/transformer.yaml --seed 0 1 2
+ft train --config configs/models/transformer.yaml --seed 1 2
 
 step "waiting for LightGBM"
 if ! wait "$lgbm_pid"; then
