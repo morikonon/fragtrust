@@ -1,0 +1,6 @@
+2026-11-27 23:21:49 | INFO    | cnn_m_s0: temperature 1.0877 fitted on val_a
+2026-11-27 23:21:54 | INFO    | cnn_m_s0: official_train duplicates 15,942 | accuracy all / duplicated / without 0.7861 / 0.8321 / 0.7851 | ECE (TS) 0.0051 / 0.0180 / 0.0051
+2026-11-27 23:21:54 | INFO    | cnn_m_s0: subset_train duplicates 7,513 | accuracy all / duplicated / without 0.7861 / 0.7902 / 0.7861 | ECE (TS) 0.0051 / 0.0318 / 0.0051
+2026-11-27 23:22:10 | INFO    | cnn_m_s0: ood_aes_ctr AUROC msp 0.9294, entropy 0.9128, energy 0.7863, byte entropy 0.9113
+2026-11-27 23:22:11 | INFO    | cnn_m_s0: ood_random AUROC msp 0.9294, entropy 0.9126, energy 0.7860, byte entropy 0.9113
+2026-11-27 23:22:11 | INFO    | cnn_m_s0 | ECE 0.0099 -> 0.0051 | coverage at 99% target 0.680 (accuracy 0.9917) | aps@0.95 coverage 0.9505, mean size 4.41

@@ -1,0 +1,118 @@
+{
+  "created": "2026-11-27T18:22:14+00:00",
+  "git_commit": "a9af5ea53656c3ddb62ddc33cf0921269e13a72f-dirty",
+  "config": "configs/paper.yaml",
+  "assets": {
+    "figure:reliability": {
+      "files": [
+        "paper/figures/reliability.svg",
+        "paper/figures/reliability.png"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/reliability_temperature_scaled.csv",
+        "results/runs/cnn_m_s0/analysis/reliability_uncalibrated.csv"
+      ]
+    },
+    "figure:risk_coverage": {
+      "files": [
+        "paper/figures/risk_coverage.svg",
+        "paper/figures/risk_coverage.png"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/risk_coverage.csv"
+      ]
+    },
+    "figure:per_class_f1": {
+      "files": [
+        "paper/figures/per_class_f1.svg",
+        "paper/figures/per_class_f1.png"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/per_class_test.csv"
+      ]
+    },
+    "figure:entropy": {
+      "files": [
+        "paper/figures/entropy.svg",
+        "paper/figures/entropy.png"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/entropy_bins.csv"
+      ]
+    },
+    "table:dataset": {
+      "files": [
+        "paper/tables/dataset.md",
+        "paper/tables/dataset.csv"
+      ],
+      "sources": [
+        "results/data/fft75_4096_s1_v1/class_balance.csv",
+        "results/data/fft75_4096_s1_v1/manifest.json"
+      ]
+    },
+    "table:leakage": {
+      "files": [
+        "paper/tables/leakage.md",
+        "paper/tables/leakage.csv"
+      ],
+      "sources": [
+        "results/data/fft75_4096_s1_v1/leakage.json"
+      ]
+    },
+    "table:duplicates": {
+      "files": [
+        "paper/tables/duplicates.md",
+        "paper/tables/duplicates.csv"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/trust.json"
+      ]
+    },
+    "table:main_results": {
+      "files": [
+        "paper/tables/main_results.md",
+        "paper/tables/main_results.csv"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/meta.json",
+        "results/runs/cnn_m_s0/metrics.json"
+      ]
+    },
+    "table:calibration": {
+      "files": [
+        "paper/tables/calibration.md",
+        "paper/tables/calibration.csv"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/trust.json"
+      ]
+    },
+    "table:selective": {
+      "files": [
+        "paper/tables/selective.md",
+        "paper/tables/selective.csv"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/trust.json"
+      ]
+    },
+    "table:conformal": {
+      "files": [
+        "paper/tables/conformal.md",
+        "paper/tables/conformal.csv"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/trust.json"
+      ]
+    },
+    "table:ood": {
+      "files": [
+        "paper/tables/ood.md",
+        "paper/tables/ood.csv"
+      ],
+      "sources": [
+        "results/runs/cnn_m_s0/analysis/trust.json"
+      ]
+    }
+  }
+}

@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from fragtrust.case_study.build import build_image
-from fragtrust.case_study.evaluate import NONE
+from fragtrust.case_study.evaluate import NONE, TrustParams, trust_metrics
 from fragtrust.case_study.fat32 import Fat32
 from fragtrust.case_study.ground_truth import NOT_EVIDENCE, UNKNOWN, cluster_table, label_for, read_overrides
 from fragtrust.case_study.scan import image_blocks
@@ -108,6 +108,23 @@ def test_propagation_stops_at_next_header_or_empty_cluster():
     headers = np.array([-1, 3, -1, -1, 7, -1, -1, -1])
     empty = np.array([0, 0, 0, 1, 0, 0, 1, 0], dtype=bool)
     assert propagate(headers, empty).tolist() == [-1, 3, 3, -1, 7, 7, -1, -1]
+
+
+@pytest.mark.parametrize("threshold", [None, 0.999])
+def test_target_is_not_met_when_nothing_is_answered(threshold):
+    flat = np.zeros((10, 3))
+    out = trust_metrics(TrustParams(1.0, {0.99: threshold}, {}), flat, np.zeros(10, dtype=int), np.random.default_rng(0))
+    assert out["answered@0.99"] == 0
+    assert out["no_answers@0.99"] is True
+    assert out["meets@0.99"] is False
+
+
+def test_target_is_met_when_answers_reach_it():
+    confident = np.tile([8.0, 0.0, 0.0], (10, 1))
+    out = trust_metrics(TrustParams(1.0, {0.99: 0.5}, {}), confident, np.zeros(10, dtype=int), np.random.default_rng(0))
+    assert out["answered@0.99"] == 10
+    assert out["no_answers@0.99"] is False
+    assert out["meets@0.99"] is True
 
 
 def test_scan_and_evaluation_on_simulated_image(case):

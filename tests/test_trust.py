@@ -2,11 +2,13 @@ import numpy as np
 import pytest
 from helpers import calibrated_sample
 from scipy.special import softmax
+from scipy.stats import binom
 
 from fragtrust.trust.calibration import brier, ece, fit_temperature, reliability
+from fragtrust.trust.analyze import duplicate_effect
 from fragtrust.trust.conformal import METHODS, ConformalPredictor, conformal_quantile, set_metrics
 from fragtrust.trust.ood import anomaly_score, auroc
-from fragtrust.trust.selective import apply_threshold, aurc, fit_threshold
+from fragtrust.trust.selective import apply_threshold, aurc, fit_threshold, ltt_min_size, selective_report
 
 
 def _bernoulli_confidence(n, rng):
@@ -69,6 +71,23 @@ def test_threshold_is_none_when_target_is_unreachable():
     assert apply_threshold(conf, wrong, None)["coverage"] == 0
 
 
+@pytest.mark.parametrize(("target", "expected"), [(0.95, 59), (0.99, 299)])
+def test_ltt_min_size_is_the_smallest_set_passing_with_zero_errors(target, expected):
+    m = ltt_min_size(target, 0.05)
+    assert m == expected
+    assert binom.cdf(0, m, 1 - target) <= 0.05 < binom.cdf(0, m - 1, 1 - target)
+
+
+def test_target_is_not_met_without_answers():
+    rng = np.random.default_rng(7)
+    conf, correct = _bernoulli_confidence(200, rng)
+    report = selective_report(conf, correct, conf, correct, (0.99,), 0.05)
+    ltt = report["targets"]["0.99"]["ltt"]
+    assert report["n_cal"] == 200 < ltt["m_min"] == 299
+    assert ltt["threshold"] is None and ltt["answered"] == 0
+    assert ltt["meets_target"] is False
+
+
 def test_conformal_sets_reach_nominal_coverage():
     rng = np.random.default_rng(5)
     cal_p, cal_y = calibrated_sample(5_000, 10, rng)
@@ -91,3 +110,23 @@ def test_ood_scores_separate_confident_from_flat_logits():
     flat = rng.normal(0, 0.1, (500, 5))
     for kind in ("msp", "entropy", "energy"):
         assert auroc(anomaly_score(confident, 1.0, kind), anomaly_score(flat, 1.0, kind)) > 0.99
+
+
+def test_duplicate_effect_splits_test_metrics_by_duplicate_mask():
+    y = np.array([0, 0, 1, 1, 2, 2])
+    pred = np.array([0, 0, 1, 1, 2, 0])
+    conf = np.array([1.0, 1.0, 1.0, 1.0, 0.5, 0.5])
+    masks = {"official_train": np.array([1, 1, 1, 1, 0, 0], bool), "subset_train": np.zeros(6, bool)}
+    report = duplicate_effect(y, pred, conf, masks, n_bins=10)
+
+    official = report["official_train"]
+    assert official["duplicated"] == {"n": 4, "accuracy": 1.0, "macro_f1": 1.0, "ece": 0.0}
+    assert official["without"]["n"] == 2 and official["without"]["accuracy"] == 0.5
+    assert official["without"]["macro_f1"] == pytest.approx(2 / 3)
+    assert official["all"]["accuracy"] == pytest.approx(5 / 6)
+    assert official["all_minus_without"]["accuracy"] == pytest.approx(5 / 6 - 0.5)
+    subset = report["subset_train"]
+    assert subset["duplicated"] == {"n": 0, "accuracy": None, "macro_f1": None, "ece": None}
+    assert subset["without"] == subset["all"] and subset["all_minus_without"]["accuracy"] == 0.0
+    with pytest.raises(ValueError):
+        duplicate_effect(y, pred, conf, {"official_train": np.zeros(5, bool)}, n_bins=10)

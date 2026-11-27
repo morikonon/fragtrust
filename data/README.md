@@ -32,4 +32,8 @@ Sources:
 Built by `fragtrust prepare --config configs/data/fft75_4096_s1_v1.yaml` (seed 2026): 20,000 training
 blocks per class, 4,000 validation blocks per class split into two halves (val_a, val_b), and the full
 official test split. Row indices into the official files are saved in `processed/.../indices/`, and
-`manifest.json` holds the sha256 of every input and output file.
+`manifest.json` holds the sha256 of every input and output file. `test_duplicates.npz` flags every test
+block that also occurs in the official train split (`official_train`) and in our 20,000-per-class
+training subset (`subset_train`); for a subset prepared before this file existed,
+`fragtrust duplicates --config configs/data/fft75_4096_s1_v1.yaml` adds it from the official
+`train.npz` without rebuilding anything.

@@ -1,0 +1,2 @@
+Model,AURC,Coverage 95% (LTT),Accuracy 95% (LTT),Met 95%,Coverage 95% (empirical),Coverage 99% (LTT),Accuracy 99% (LTT),Met 99%,Coverage 99% (empirical)
+CNN,0.032,77.14,95.27,1/1,77.85,68.01,99.17,1/1,69.03

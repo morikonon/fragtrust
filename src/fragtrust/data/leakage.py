@@ -47,3 +47,8 @@ def duplicate_report(
     )
     per_class["test_in_train_frac"] = per_class["test_in_train"] / per_class["n_test"]
     return summary, per_class
+
+
+def duplicate_masks(train_hash: np.ndarray, train_idx: np.ndarray, test_hash: np.ndarray) -> dict[str, np.ndarray]:
+    """Per test block: does it occur in the official train split, and in the rows we train on?"""
+    return {"official_train": np.isin(test_hash, train_hash), "subset_train": np.isin(test_hash, train_hash[train_idx])}

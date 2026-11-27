@@ -1,0 +1,50 @@
+{
+  "run_id": "cnn_m_s0",
+  "model": "cnn_m",
+  "seed": 0,
+  "dataset": "fft75_4096_s1_v1",
+  "started": "2026-11-27T17:12:04+00:00",
+  "git_commit": "f0544b8d8c9150919875270741a32c07fd5bd570-dirty",
+  "hardware": {
+    "host": "vm-tesla",
+    "platform": "Linux-6.5.0-1017-gcp-x86_64-with-glibc2.35",
+    "python": "3.10.12",
+    "cpu": "Intel(R) Xeon(R) Gold 6354 CPU @ 3.00GHz",
+    "cpu_count": 40,
+    "cpus_available": 40,
+    "ram_gb": 503.7,
+    "cuda": "12.4",
+    "mps": false,
+    "gpus": [
+      {
+        "name": "NVIDIA A100-PCIE-40GB",
+        "memory_gb": 39.4
+      }
+    ],
+    "packages": {
+      "numpy": "2.2.6",
+      "pandas": "2.3.3",
+      "scipy": "1.15.3",
+      "scikit-learn": "1.7.2",
+      "lightgbm": "4.7.0",
+      "torch": "2.6.0+cu124",
+      "cryptography": "50.0.2",
+      "pyyaml": "6.0.4",
+      "matplotlib": "3.10.9",
+      "onnx": "1.23.2",
+      "onnxruntime": "1.23.2"
+    },
+    "cudnn": 90100
+  },
+  "finished": "2026-11-27T17:49:09+00:00",
+  "wall_seconds": 2223.7,
+  "logits_kind": "logits",
+  "params": 582347,
+  "model_bytes": 2341544,
+  "train_blocks": 1500000,
+  "epoch": 22,
+  "best_epoch": 17,
+  "best_val_acc": 0.7874333333333333,
+  "bad_epochs": 5,
+  "train_seconds": 2176.9546624901704
+}

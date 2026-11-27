@@ -2,6 +2,7 @@
 
 Stratified, fixed-seed sampling; one streaming pass per official file copies the selected rows,
 hashes every block (for the train/test duplicate check) and flags constant blocks.
+`add_duplicates` adds the per-block duplicate masks to a dataset prepared before they existed.
 """
 
 from __future__ import annotations
@@ -18,12 +19,14 @@ from numpy.lib.format import open_memmap
 
 from ..features import block_entropy
 from ..runtime import git_commit, read_json, utc_now, write_json
-from .leakage import block_hashes, duplicate_report
+from .leakage import block_hashes, duplicate_masks, duplicate_report
 from .npz import NpzSource
 from .probes import PROBE_DESCRIPTIONS, make_probes
-from .store import SPLITS, split_in_halves, stratified_indices
+from .store import DUPLICATES_FILE, SPLITS, FragmentStore, split_in_halves, stratified_indices
 
 log = logging.getLogger(__name__)
+
+LEAKAGE_KEYS = {"official_train": "official_train_vs_test", "subset_train": "subset_train_vs_test"}
 
 
 def load_class_names(path: str | None, n_classes: int) -> tuple[list[str], str]:
@@ -49,7 +52,8 @@ def copy_rows(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Copy the rows `outputs[split]` (sorted indices) of `src` into <split>_x.npy in one pass.
 
-    Returns a 64-bit hash and a constant-block flag for every row of the source.
+    Returns a 64-bit hash and a constant-block flag for every row of the source; an empty
+    `outputs` only hashes.
     """
     targets = {
         split: open_memmap(out / f"{split}_x.npy", mode="w+", dtype=np.uint8, shape=(len(idx), src.block_size))
@@ -77,6 +81,45 @@ def copy_rows(
     for target in targets.values():
         target.flush()
     return hashes, constant
+
+
+def save_duplicates(root: Path, masks: dict[str, np.ndarray]) -> None:
+    np.savez(root / DUPLICATES_FILE, **masks)
+    counts = ", ".join(f"{side} {int(mask.sum()):,}" for side, mask in masks.items())
+    n_test = len(next(iter(masks.values())))
+    log.info("test blocks (of %s) also in %s -> %s", f"{n_test:,}", counts, root / DUPLICATES_FILE)
+
+
+def check_duplicates(masks: dict[str, np.ndarray], leakage: dict[str, Any]) -> None:
+    """The masks must reproduce leakage.json; the official count only if our test split is the full official one."""
+    for side, mask in masks.items():
+        expected = leakage[LEAKAGE_KEYS[side]]
+        if expected["n_test"] == len(mask) and expected["test_in_train"] != int(mask.sum()):
+            raise ValueError(f"{side}: {int(mask.sum())} duplicated test blocks, leakage.json says {expected['test_in_train']}")
+
+
+def add_duplicates(cfg: dict[str, Any], results: Path, force: bool = False) -> Path:
+    """Duplicate masks for an existing dataset: hashes the official train file and our test blocks, rebuilds nothing."""
+    out = Path(cfg["out_dir"])
+    store = FragmentStore(out)
+    path = out / DUPLICATES_FILE
+    if path.exists() and not force:
+        log.info("%s exists, skipping (--force to recompute)", path)
+        return path
+    train = NpzSource(cfg["raw"]["train"], cfg["block_size"])
+    if train.n != store.manifest["sources"]["train"]["rows"]:
+        raise ValueError(f"{train.path}: {train.n} rows, the dataset was built from {store.manifest['sources']['train']['rows']}")
+    log.info("hashing the official train split %s (%s rows)", train.path, f"{train.n:,}")
+    train_hash, _ = copy_rows(train, {}, out, cfg["chunk_rows"])
+    t0 = time.perf_counter()
+    test_hash = block_hashes(store.x("test"))
+    log.info("hashed %s processed test blocks in %.1f s", f"{len(test_hash):,}", time.perf_counter() - t0)
+    masks = duplicate_masks(train_hash, np.load(out / "indices" / "train.npy"), test_hash)
+    leakage = results / "data" / cfg["name"] / "leakage.json"
+    check_duplicates(masks, read_json(leakage))
+    log.info("duplicate counts match %s", leakage)
+    save_duplicates(out, masks)
+    return path
 
 
 def write_derived(root: Path, n_probe: int, seed: int) -> dict[str, Any]:
@@ -139,6 +182,7 @@ def prepare(cfg: dict[str, Any], results: Path, force: bool = False) -> Path:
     write_json(report_dir / "leakage.json", {"official_train_vs_test": official, "subset_train_vs_test": subset})
     per_class.to_csv(report_dir / "leakage_per_class.csv", index=False)
     log.info("duplicates: %d of %d official test blocks also occur in official train", official["test_in_train"], official["n_test"])
+    save_duplicates(out, duplicate_masks(train_hash, train_idx, test_hash[test_idx]))
 
     probes = write_derived(out, cfg["probes"]["n_blocks"], cfg["seed"])
     class_balance(out, names).to_csv(report_dir / "class_balance.csv", index=False)

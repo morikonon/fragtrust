@@ -2,11 +2,14 @@
 
 import numpy as np
 import pandas as pd
+import pytest
 import torch
 from helpers import CNN, cnn_config, lgbm_config, make_store
 
 from fragtrust.config import RunDir
+from fragtrust.data.store import DUPLICATES_FILE, FragmentStore
 from fragtrust.experiment import ensemble, train
+from fragtrust.features import block_entropy
 from fragtrust.models import build_net
 from fragtrust.runtime import read_json, seed_everything
 from fragtrust.summarize import summarize
@@ -14,6 +17,7 @@ from fragtrust.training import trainer
 from fragtrust.training.batches import BlockBatches
 from fragtrust.training.trainer import TrainConfig, fit
 from fragtrust.trust.analyze import analyze
+from fragtrust.trust.ood import auroc
 
 
 def test_full_pipeline(tmp_path):
@@ -31,8 +35,25 @@ def test_full_pipeline(tmp_path):
         assert not (run.path / "last.pt").exists()
         report = analyze(run.path)
         assert set(report) >= {"calibration", "selective", "conformal", "ood"}
+        assert "duplicates" not in report
         assert run.logits("test").shape == (210, 7)
     assert "energy" not in read_json(results / "runs" / "lgbm_s0" / "analysis" / "trust.json")["ood"]["ood_random"]["auroc"]
+    store = FragmentStore(data_dir)
+    expected = auroc(store.test_entropy(), block_entropy(store.x("ood_random")))
+    for run_id in ("cnn_s0", "lgbm_s0"):
+        ood = read_json(results / "runs" / run_id / "analysis" / "trust.json")["ood"]["ood_random"]
+        assert ood["auroc"]["byte_entropy"] == expected
+
+    official = np.arange(210) % 10 == 0
+    np.savez(data_dir / DUPLICATES_FILE, official_train=official, subset_train=official & (np.arange(210) % 20 == 0))
+    report = analyze(results / "runs" / "lgbm_s0")
+    metrics = read_json(results / "runs" / "lgbm_s0" / "metrics.json")
+    assert report["duplicates"]["official_train"]["duplicated"]["n"] == 21
+    assert report["duplicates"]["subset_train"]["without"]["n"] == 199
+    everything = report["duplicates"]["official_train"]["all"]
+    assert everything["accuracy"] == pytest.approx(metrics["accuracy"])
+    assert everything["macro_f1"] == pytest.approx(metrics["macro_f1"])
+    assert everything["ece"] == pytest.approx(report["calibration"]["temperature_scaled"]["ece"])
 
     by_model = summarize(results)
     assert by_model.loc["cnn", "n_runs"] == 2

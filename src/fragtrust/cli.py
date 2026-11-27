@@ -29,6 +29,15 @@ def _prepare(args: argparse.Namespace) -> None:
     prepare(cfg, args.results, args.force)
 
 
+def _duplicates(args: argparse.Namespace) -> None:
+    from .config import load_config
+    from .data.prepare import add_duplicates
+
+    cfg = load_config(args.config)
+    setup_logging(args.results / "data" / cfg["name"] / "duplicates.log")
+    add_duplicates(cfg, args.results, args.force)
+
+
 def _synth(args: argparse.Namespace) -> None:
     from .config import load_config
     from .data.synthetic import make_synthetic
@@ -201,6 +210,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("env", parents=[common], help="record hardware and package versions").set_defaults(func=_env)
     sub.add_parser("prepare", parents=[common, config, force], help="build the processed FFT-75 subset").set_defaults(func=_prepare)
+    sub.add_parser("duplicates", parents=[common, config, force], help="test-block duplicate masks for a prepared dataset").set_defaults(func=_duplicates)
     sub.add_parser("synth", parents=[common, config], help="write a synthetic dataset for smoke tests").set_defaults(func=_synth)
     sub.add_parser("tune", parents=[common, config, force], help="LightGBM grid search on val_a").set_defaults(func=_tune)
 

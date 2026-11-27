@@ -1,0 +1,9 @@
+2026-11-27 23:08:30 | INFO    | run lgbm_s0 | dataset fft75_4096_s1_v1 (75 classes) | git f0544b8d8c9150919875270741a32c07fd5bd570-dirty
+2026-11-27 23:08:31 | INFO    | LightGBM params: {'objective': 'multiclass', 'num_class': 75, 'metric': ['multi_logloss', 'multi_error'], 'seed': 0, 'num_threads': 39, 'deterministic': True, 'force_row_wise': True, 'verbosity': -1, 'max_bin': 63, 'min_data_in_leaf': 50, 'feature_fraction': 0.8, 'bagging_fraction': 0.8, 'bagging_freq': 1, 'lambda_l2': 1.0, 'num_leaves': 63, 'learning_rate': 0.05}
+2026-11-27 23:08:32 | INFO    | train 1,500,000 blocks x 262 features
+2026-11-27 23:08:39 | INFO    | Training until validation scores don't improve for 50 rounds
+2026-11-27 23:10:52 | INFO    | [25]	val_a's multi_logloss: 1.42838	val_a's multi_error: 0.335947
+2026-11-27 23:13:20 | INFO    | [50]	val_a's multi_logloss: 1.20017	val_a's multi_error: 0.319533
+2026-11-27 23:15:55 | INFO    | [75]	val_a's multi_logloss: 1.12275	val_a's multi_error: 0.31032
+2026-11-27 23:18:31 | INFO    | [100]	val_a's multi_logloss: 1.0837	val_a's multi_error: 0.304353
+2026-11-27 23:24:50 | INFO    | [125]	val_a's multi_logloss: 1.05871	val_a's multi_error: 0.300253

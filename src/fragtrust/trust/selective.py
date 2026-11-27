@@ -19,6 +19,16 @@ def aurc(conf: np.ndarray, correct: np.ndarray) -> float:
     return float(risk_coverage(conf, correct)[1].mean())
 
 
+def ltt_min_size(target_acc: float, delta: float) -> int:
+    """Smallest accepted set that can pass the binomial test at all (only with zero errors)."""
+    return int(np.ceil(np.log(delta) / np.log1p(-(1.0 - target_acc))))
+
+
+def meets_target(selective_accuracy: float | None, target_acc: float) -> bool:
+    """Abstaining on everything answers nothing, so it does not meet a target."""
+    return selective_accuracy is not None and selective_accuracy >= target_acc
+
+
 def fit_threshold(
     conf: np.ndarray, correct: np.ndarray, target_acc: float, method: str = "ltt", delta: float = 0.05, grid: int = 100
 ) -> float | None:
@@ -42,8 +52,8 @@ def fit_threshold(
     if method != "ltt":
         raise ValueError(f"unknown method {method!r}")
     # smaller sets fail the test even with zero errors and would end the sequence at once;
-    # m_min depends only on (n, target, delta), so skipping them keeps the order data-independent
-    m_min = int(np.ceil(np.log(delta) / np.log1p(-max_risk)))
+    # m_min depends only on (target, delta), so skipping them keeps the order data-independent
+    m_min = ltt_min_size(target_acc, delta)
     if m_min > n:
         return None
     sizes = np.unique(np.r_[m_min, np.ceil(np.arange(1, grid + 1) * n / grid).astype(np.int64)])
@@ -60,6 +70,7 @@ def apply_threshold(conf: np.ndarray, correct: np.ndarray, threshold: float | No
     n_accepted = int(accepted.sum())
     return {
         "threshold": threshold,
+        "answered": n_accepted,
         "coverage": n_accepted / len(conf),
         "selective_accuracy": float(correct[accepted].mean()) if n_accepted else None,
     }
@@ -77,13 +88,14 @@ def selective_report(
     report: dict[str, Any] = {
         "aurc": aurc(test_conf, test_correct),
         "aurc_oracle": aurc(test_correct.astype(np.float64), test_correct),
+        "n_cal": len(cal_conf),
         "targets": {},
     }
     for target in targets:
         entry = {}
         for method in ("empirical", "ltt"):
             result = apply_threshold(test_conf, test_correct, fit_threshold(cal_conf, cal_correct, target, method, delta))
-            acc = result["selective_accuracy"]
-            entry[method] = {**result, "meets_target": acc is None or acc >= target}
+            entry[method] = {**result, "meets_target": meets_target(result["selective_accuracy"], target)}
+        entry["ltt"]["m_min"] = ltt_min_size(target, delta)
         report["targets"][f"{target:.2f}"] = entry
     return report

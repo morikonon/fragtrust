@@ -3,6 +3,7 @@
 <root>/<split>_x.npy      uint8 (n, block_size), memory-mappable
 <root>/<split>_y.npy      int16 (n,)
 <root>/test_entropy.npy   float32 Shannon entropy of each test block, bits per byte
+<root>/test_duplicates.npz  bool per test block: also in the official train split / in our train subset
 <root>/features/*.npy     cached hand-crafted features (LightGBM)
 <root>/manifest.json      written last: its presence marks a complete dataset
 """
@@ -20,6 +21,7 @@ from ..runtime import read_json
 SPLITS = ("train", "val_a", "val_b", "test")
 PROBES = ("ood_aes_ctr", "ood_random")
 EVAL_SPLITS = ("val_a", "val_b", "test", *PROBES)
+DUPLICATES_FILE = "test_duplicates.npz"
 
 
 class FragmentStore:
@@ -54,6 +56,14 @@ class FragmentStore:
 
     def test_entropy(self) -> np.ndarray:
         return np.load(self.root / "test_entropy.npy")
+
+    def test_duplicates(self) -> dict[str, np.ndarray] | None:
+        """Duplicate masks per train side (`official_train`, `subset_train`); None if never computed."""
+        path = self.root / DUPLICATES_FILE
+        if not path.exists():
+            return None
+        with np.load(path) as masks:
+            return {side: masks[side] for side in masks.files}
 
     def features(self, split: str, workers: int | None = None) -> np.ndarray:
         path = self.root / "features" / f"{split}.npy"

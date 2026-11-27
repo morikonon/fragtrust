@@ -1,0 +1,38 @@
+2026-11-27 23:18:34 | INFO    | hashing the official train split data/raw/4k_1/train.npz (6,144,000 rows)
+2026-11-27 23:18:53 | INFO    | train.npz:  10.1% (622,592 rows, 31961 rows/s, eta 2.9 min)
+2026-11-27 23:19:13 | INFO    | train.npz:  20.3% (1,245,184 rows, 32006 rows/s, eta 2.6 min)
+2026-11-27 23:19:32 | INFO    | train.npz:  30.4% (1,867,776 rows, 31971 rows/s, eta 2.2 min)
+2026-11-27 23:19:49 | INFO    | train.npz:  40.0% (2,457,600 rows, 32481 rows/s, eta 1.9 min)
+2026-11-27 23:20:08 | INFO    | train.npz:  50.1% (3,080,192 rows, 32742 rows/s, eta 1.6 min)
+2026-11-27 23:20:26 | INFO    | train.npz:  60.3% (3,702,784 rows, 32867 rows/s, eta 1.2 min)
+2026-11-27 23:20:45 | INFO    | train.npz:  70.4% (4,325,376 rows, 32895 rows/s, eta 0.9 min)
+2026-11-27 23:21:03 | INFO    | train.npz:  80.0% (4,915,200 rows, 32901 rows/s, eta 0.6 min)
+2026-11-27 23:21:22 | INFO    | train.npz:  90.1% (5,537,792 rows, 32905 rows/s, eta 0.3 min)
+2026-11-27 23:21:41 | INFO    | train.npz: 100.0% (6,144,000 rows, 32827 rows/s, eta 0.0 min)
+2026-11-27 23:21:47 | INFO    | hashed 768,000 processed test blocks in 6.1 s
+2026-11-27 23:21:47 | INFO    | duplicate counts match results/data/fft75_4096_s1_v1/leakage.json
+2026-11-27 23:21:47 | INFO    | test blocks (of 768,000) also in official_train 15,942, subset_train 7,513 -> data/processed/fft75_4096_s1_v1/test_duplicates.npz
+2026-11-27 23:21:49 | INFO    | cnn_m_s0: temperature 1.0877 fitted on val_a
+2026-11-27 23:21:54 | INFO    | cnn_m_s0: official_train duplicates 15,942 | accuracy all / duplicated / without 0.7861 / 0.8321 / 0.7851 | ECE (TS) 0.0051 / 0.0180 / 0.0051
+2026-11-27 23:21:54 | INFO    | cnn_m_s0: subset_train duplicates 7,513 | accuracy all / duplicated / without 0.7861 / 0.7902 / 0.7861 | ECE (TS) 0.0051 / 0.0318 / 0.0051
+2026-11-27 23:22:10 | INFO    | cnn_m_s0: ood_aes_ctr AUROC msp 0.9294, entropy 0.9128, energy 0.7863, byte entropy 0.9113
+2026-11-27 23:22:11 | INFO    | cnn_m_s0: ood_random AUROC msp 0.9294, entropy 0.9126, energy 0.7860, byte entropy 0.9113
+2026-11-27 23:22:11 | INFO    | cnn_m_s0 | ECE 0.0099 -> 0.0051 | coverage at 99% target 0.680 (accuracy 0.9917) | aps@0.95 coverage 0.9505, mean size 4.41
+2026-11-27 23:22:13 | INFO    | figure reliability    -> paper/figures/reliability.svg
+2026-11-27 23:22:13 | INFO    | figure risk_coverage  -> paper/figures/risk_coverage.svg
+2026-11-27 23:22:14 | INFO    | figure per_class_f1   -> paper/figures/per_class_f1.svg
+2026-11-27 23:22:14 | INFO    | figure entropy        -> paper/figures/entropy.svg
+2026-11-27 23:22:14 | INFO    | figure capacity       skipped (inputs not available yet)
+2026-11-27 23:22:14 | INFO    | figure shap           skipped (inputs not available yet)
+2026-11-27 23:22:14 | INFO    | figure disk_map       skipped (inputs not available yet)
+2026-11-27 23:22:14 | INFO    | table  dataset        -> paper/tables/dataset.md
+2026-11-27 23:22:14 | INFO    | table  leakage        -> paper/tables/leakage.md
+2026-11-27 23:22:14 | INFO    | table  duplicates     -> paper/tables/duplicates.md
+2026-11-27 23:22:14 | INFO    | table  main_results   -> paper/tables/main_results.md
+2026-11-27 23:22:14 | INFO    | table  calibration    -> paper/tables/calibration.md
+2026-11-27 23:22:14 | INFO    | table  selective      -> paper/tables/selective.md
+2026-11-27 23:22:14 | INFO    | table  conformal      -> paper/tables/conformal.md
+2026-11-27 23:22:14 | INFO    | table  ood            -> paper/tables/ood.md
+2026-11-27 23:22:14 | INFO    | table  case_study     skipped (inputs not available yet)
+2026-11-27 23:22:14 | INFO    | table  recalibration  skipped (inputs not available yet)
+EXIT=0

@@ -1,0 +1,4 @@
+| Model | Duplicated in | Duplicated test blocks | Accuracy all (%) | Accuracy duplicated (%) | Accuracy without (%) | All − without (pp) | Macro-F1 without (%) | ECE (TS) duplicated | ECE (TS) without |
+|---|---|---|---|---|---|---|---|---|---|
+| CNN | official train | 15,942 | 78.61 | 83.21 | 78.51 | 0.10 | 78.79 | 0.018 | 0.005 |
+| CNN | our train subset | 7,513 | 78.61 | 79.02 | 78.61 | 0.00 | 78.85 | 0.032 | 0.005 |

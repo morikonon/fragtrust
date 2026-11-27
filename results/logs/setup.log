@@ -1,0 +1,31 @@
+
+==> [2026-11-27 21:43:00] system packages
+WARNING: missing mtools; install them as root (dosfstools and mtools are only needed to build the case-study image)
+
+==> [2026-11-27 21:43:00] python environment (.venv isolated)
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+fragtrust 0.1.0 requires cryptography>=42, which is not installed.
+fragtrust 0.1.0 requires lightgbm>=4.3, which is not installed.
+fragtrust 0.1.0 requires matplotlib>=3.8, which is not installed.
+fragtrust 0.1.0 requires numpy>=1.26, which is not installed.
+fragtrust 0.1.0 requires pandas>=2.1, which is not installed.
+fragtrust 0.1.0 requires pyyaml>=6.0, which is not installed.
+fragtrust 0.1.0 requires scikit-learn>=1.4, which is not installed.
+fragtrust 0.1.0 requires scipy>=1.11, which is not installed.
+
+==> [2026-11-27 21:45:00] PyTorch and GPU
+torch 2.6.0+cu124 | CUDA build 12.4 | GPU visible: True
+GPU: NVIDIA A100-PCIE-40GB
+
+==> [2026-11-27 21:45:02] tests (on Linux with the bench extra nothing should be skipped)
+..........s.......................................                       [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_case_study.py:146: needs dosfstools and mtools (Linux)
+49 passed, 1 skipped in 16.40s
+
+==> [2026-11-27 21:45:20] hardware record
+Intel(R) Xeon(R) Gold 6354 CPU @ 3.00GHz | 40 of 40 cores available | 503.7 GB RAM | GPU: NVIDIA A100-PCIE-40GB
+written: results/hardware.json, results/environment.txt
+
+setup finished
+EXIT=0

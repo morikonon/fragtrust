@@ -1,0 +1,138 @@
+2026-11-27 22:12:04 | INFO    | run cnn_m_s0 | dataset fft75_4096_s1_v1 (75 classes) | git f0544b8d8c9150919875270741a32c07fd5bd570-dirty
+2026-11-27 22:12:06 | INFO    | cnn on cuda: 582,347 parameters
+2026-11-27 22:12:06 | INFO    | train 1,500,000 blocks | val_a 150,000 blocks | 6.3 GB kept on cuda
+2026-11-27 22:12:56 | INFO    | epoch 1 step 500/2929 | loss 2.9714 | acc 0.3059 | lr 3.42e-04 | 9418 blocks/s | epoch eta 2.2 min
+2026-11-27 22:13:16 | INFO    | epoch 1 step 1000/2929 | loss 2.3561 | acc 0.4288 | lr 6.84e-04 | 10827 blocks/s | epoch eta 1.5 min
+2026-11-27 22:13:32 | INFO    | epoch 1 step 1500/2929 | loss 2.0363 | acc 0.4937 | lr 1.02e-03 | 12081 blocks/s | epoch eta 1.0 min
+2026-11-27 22:13:48 | INFO    | epoch 1 step 2000/2929 | loss 1.8337 | acc 0.5358 | lr 1.37e-03 | 12823 blocks/s | epoch eta 0.6 min
+2026-11-27 22:14:05 | INFO    | epoch 1 step 2500/2929 | loss 1.6922 | acc 0.5657 | lr 1.71e-03 | 13314 blocks/s | epoch eta 0.3 min
+2026-11-27 22:14:22 | INFO    | epoch 1/30 | train loss 1.5987 acc 0.5854 | val_a loss 1.1285 acc 0.6803 (best) | 113s
+2026-11-27 22:14:38 | INFO    | epoch 2 step 500/2929 | loss 0.9879 | acc 0.7168 | lr 2.00e-03 | 15681 blocks/s | epoch eta 1.3 min
+2026-11-27 22:14:55 | INFO    | epoch 2 step 1000/2929 | loss 0.9647 | acc 0.7216 | lr 2.00e-03 | 15678 blocks/s | epoch eta 1.0 min
+2026-11-27 22:15:11 | INFO    | epoch 2 step 1500/2929 | loss 0.9497 | acc 0.7248 | lr 2.00e-03 | 15674 blocks/s | epoch eta 0.8 min
+2026-11-27 22:15:27 | INFO    | epoch 2 step 2000/2929 | loss 0.9353 | acc 0.7279 | lr 2.00e-03 | 15675 blocks/s | epoch eta 0.5 min
+2026-11-27 22:15:44 | INFO    | epoch 2 step 2500/2929 | loss 0.9234 | acc 0.7305 | lr 2.00e-03 | 15674 blocks/s | epoch eta 0.2 min
+2026-11-27 22:16:00 | INFO    | epoch 2/30 | train loss 0.9142 acc 0.7327 | val_a loss 0.8589 acc 0.7454 (best) | 98s
+2026-11-27 22:16:17 | INFO    | epoch 3 step 500/2929 | loss 0.8306 | acc 0.7515 | lr 1.99e-03 | 15700 blocks/s | epoch eta 1.3 min
+2026-11-27 22:16:33 | INFO    | epoch 3 step 1000/2929 | loss 0.8318 | acc 0.7513 | lr 1.99e-03 | 15672 blocks/s | epoch eta 1.1 min
+2026-11-27 22:16:49 | INFO    | epoch 3 step 1500/2929 | loss 0.8303 | acc 0.7516 | lr 1.99e-03 | 15646 blocks/s | epoch eta 0.8 min
+2026-11-27 22:17:06 | INFO    | epoch 3 step 2000/2929 | loss 0.8274 | acc 0.7526 | lr 1.98e-03 | 15641 blocks/s | epoch eta 0.5 min
+2026-11-27 22:17:22 | INFO    | epoch 3 step 2500/2929 | loss 0.8240 | acc 0.7536 | lr 1.98e-03 | 15656 blocks/s | epoch eta 0.2 min
+2026-11-27 22:17:39 | INFO    | epoch 3/30 | train loss 0.8222 acc 0.7539 | val_a loss 0.8103 acc 0.7567 (best) | 98s
+2026-11-27 22:17:55 | INFO    | epoch 4 step 500/2929 | loss 0.7834 | acc 0.7632 | lr 1.97e-03 | 15714 blocks/s | epoch eta 1.3 min
+2026-11-27 22:18:11 | INFO    | epoch 4 step 1000/2929 | loss 0.7850 | acc 0.7628 | lr 1.97e-03 | 15710 blocks/s | epoch eta 1.0 min
+2026-11-27 22:18:28 | INFO    | epoch 4 step 1500/2929 | loss 0.7841 | acc 0.7629 | lr 1.96e-03 | 15712 blocks/s | epoch eta 0.8 min
+2026-11-27 22:18:44 | INFO    | epoch 4 step 2000/2929 | loss 0.7827 | acc 0.7633 | lr 1.96e-03 | 15712 blocks/s | epoch eta 0.5 min
+2026-11-27 22:19:00 | INFO    | epoch 4 step 2500/2929 | loss 0.7820 | acc 0.7634 | lr 1.95e-03 | 15713 blocks/s | epoch eta 0.2 min
+2026-11-27 22:19:17 | INFO    | epoch 4/30 | train loss 0.7818 acc 0.7636 | val_a loss 0.7925 acc 0.7588 (best) | 98s
+2026-11-27 22:19:33 | INFO    | epoch 5 step 500/2929 | loss 0.7487 | acc 0.7713 | lr 1.94e-03 | 15660 blocks/s | epoch eta 1.3 min
+2026-11-27 22:19:50 | INFO    | epoch 5 step 1000/2929 | loss 0.7509 | acc 0.7710 | lr 1.94e-03 | 15669 blocks/s | epoch eta 1.1 min
+2026-11-27 22:20:06 | INFO    | epoch 5 step 1500/2929 | loss 0.7536 | acc 0.7704 | lr 1.93e-03 | 15675 blocks/s | epoch eta 0.8 min
+2026-11-27 22:20:22 | INFO    | epoch 5 step 2000/2929 | loss 0.7537 | acc 0.7705 | lr 1.92e-03 | 15678 blocks/s | epoch eta 0.5 min
+2026-11-27 22:20:39 | INFO    | epoch 5 step 2500/2929 | loss 0.7541 | acc 0.7703 | lr 1.91e-03 | 15684 blocks/s | epoch eta 0.2 min
+2026-11-27 22:20:55 | INFO    | epoch 5/30 | train loss 0.7548 acc 0.7701 | val_a loss 0.7662 acc 0.7673 (best) | 98s
+2026-11-27 22:21:12 | INFO    | epoch 6 step 500/2929 | loss 0.7270 | acc 0.7772 | lr 1.90e-03 | 15716 blocks/s | epoch eta 1.3 min
+2026-11-27 22:21:28 | INFO    | epoch 6 step 1000/2929 | loss 0.7320 | acc 0.7754 | lr 1.89e-03 | 15700 blocks/s | epoch eta 1.0 min
+2026-11-27 22:21:44 | INFO    | epoch 6 step 1500/2929 | loss 0.7343 | acc 0.7749 | lr 1.88e-03 | 15686 blocks/s | epoch eta 0.8 min
+2026-11-27 22:22:01 | INFO    | epoch 6 step 2000/2929 | loss 0.7355 | acc 0.7747 | lr 1.87e-03 | 15682 blocks/s | epoch eta 0.5 min
+2026-11-27 22:22:17 | INFO    | epoch 6 step 2500/2929 | loss 0.7364 | acc 0.7744 | lr 1.86e-03 | 15680 blocks/s | epoch eta 0.2 min
+2026-11-27 22:22:34 | INFO    | epoch 6/30 | train loss 0.7370 acc 0.7743 | val_a loss 0.7506 acc 0.7705 (best) | 98s
+2026-11-27 22:22:50 | INFO    | epoch 7 step 500/2929 | loss 0.7125 | acc 0.7811 | lr 1.85e-03 | 15699 blocks/s | epoch eta 1.3 min
+2026-11-27 22:23:06 | INFO    | epoch 7 step 1000/2929 | loss 0.7162 | acc 0.7800 | lr 1.84e-03 | 15675 blocks/s | epoch eta 1.1 min
+2026-11-27 22:23:23 | INFO    | epoch 7 step 1500/2929 | loss 0.7190 | acc 0.7789 | lr 1.83e-03 | 15663 blocks/s | epoch eta 0.8 min
+2026-11-27 22:23:39 | INFO    | epoch 7 step 2000/2929 | loss 0.7214 | acc 0.7783 | lr 1.82e-03 | 15674 blocks/s | epoch eta 0.5 min
+2026-11-27 22:23:55 | INFO    | epoch 7 step 2500/2929 | loss 0.7224 | acc 0.7779 | lr 1.81e-03 | 15683 blocks/s | epoch eta 0.2 min
+2026-11-27 22:24:12 | INFO    | epoch 7/30 | train loss 0.7236 acc 0.7777 | val_a loss 0.7391 acc 0.7738 (best) | 98s
+2026-11-27 22:24:28 | INFO    | epoch 8 step 500/2929 | loss 0.6999 | acc 0.7831 | lr 1.78e-03 | 15724 blocks/s | epoch eta 1.3 min
+2026-11-27 22:24:45 | INFO    | epoch 8 step 1000/2929 | loss 0.7046 | acc 0.7823 | lr 1.77e-03 | 15719 blocks/s | epoch eta 1.0 min
+2026-11-27 22:25:01 | INFO    | epoch 8 step 1500/2929 | loss 0.7080 | acc 0.7811 | lr 1.76e-03 | 15718 blocks/s | epoch eta 0.8 min
+2026-11-27 22:25:17 | INFO    | epoch 8 step 2000/2929 | loss 0.7102 | acc 0.7806 | lr 1.75e-03 | 15719 blocks/s | epoch eta 0.5 min
+2026-11-27 22:25:33 | INFO    | epoch 8 step 2500/2929 | loss 0.7119 | acc 0.7803 | lr 1.74e-03 | 15719 blocks/s | epoch eta 0.2 min
+2026-11-27 22:25:50 | INFO    | epoch 8/30 | train loss 0.7125 acc 0.7802 | val_a loss 0.7341 acc 0.7746 (best) | 98s
+2026-11-27 22:26:06 | INFO    | epoch 9 step 500/2929 | loss 0.6904 | acc 0.7865 | lr 1.71e-03 | 15700 blocks/s | epoch eta 1.3 min
+2026-11-27 22:26:23 | INFO    | epoch 9 step 1000/2929 | loss 0.6943 | acc 0.7852 | lr 1.70e-03 | 15708 blocks/s | epoch eta 1.0 min
+2026-11-27 22:26:39 | INFO    | epoch 9 step 1500/2929 | loss 0.6972 | acc 0.7845 | lr 1.69e-03 | 15712 blocks/s | epoch eta 0.8 min
+2026-11-27 22:26:55 | INFO    | epoch 9 step 2000/2929 | loss 0.6990 | acc 0.7841 | lr 1.67e-03 | 15715 blocks/s | epoch eta 0.5 min
+2026-11-27 22:27:12 | INFO    | epoch 9 step 2500/2929 | loss 0.7001 | acc 0.7839 | lr 1.66e-03 | 15711 blocks/s | epoch eta 0.2 min
+2026-11-27 22:27:28 | INFO    | epoch 9/30 | train loss 0.7015 acc 0.7835 | val_a loss 0.7348 acc 0.7748 (best) | 98s
+2026-11-27 22:27:45 | INFO    | epoch 10 step 500/2929 | loss 0.6805 | acc 0.7890 | lr 1.63e-03 | 15677 blocks/s | epoch eta 1.3 min
+2026-11-27 22:28:01 | INFO    | epoch 10 step 1000/2929 | loss 0.6869 | acc 0.7872 | lr 1.62e-03 | 15674 blocks/s | epoch eta 1.1 min
+2026-11-27 22:28:17 | INFO    | epoch 10 step 1500/2929 | loss 0.6894 | acc 0.7864 | lr 1.60e-03 | 15664 blocks/s | epoch eta 0.8 min
+2026-11-27 22:28:34 | INFO    | epoch 10 step 2000/2929 | loss 0.6902 | acc 0.7861 | lr 1.59e-03 | 15668 blocks/s | epoch eta 0.5 min
+2026-11-27 22:28:50 | INFO    | epoch 10 step 2500/2929 | loss 0.6907 | acc 0.7860 | lr 1.57e-03 | 15673 blocks/s | epoch eta 0.2 min
+2026-11-27 22:29:07 | INFO    | epoch 10/30 | train loss 0.6925 acc 0.7856 | val_a loss 0.7271 acc 0.7773 (best) | 98s
+2026-11-27 22:29:23 | INFO    | epoch 11 step 500/2929 | loss 0.6710 | acc 0.7911 | lr 1.55e-03 | 15713 blocks/s | epoch eta 1.3 min
+2026-11-27 22:29:39 | INFO    | epoch 11 step 1000/2929 | loss 0.6753 | acc 0.7898 | lr 1.53e-03 | 15721 blocks/s | epoch eta 1.0 min
+2026-11-27 22:29:56 | INFO    | epoch 11 step 1500/2929 | loss 0.6785 | acc 0.7890 | lr 1.51e-03 | 15725 blocks/s | epoch eta 0.8 min
+2026-11-27 22:30:12 | INFO    | epoch 11 step 2000/2929 | loss 0.6808 | acc 0.7886 | lr 1.50e-03 | 15724 blocks/s | epoch eta 0.5 min
+2026-11-27 22:30:28 | INFO    | epoch 11 step 2500/2929 | loss 0.6826 | acc 0.7882 | lr 1.48e-03 | 15721 blocks/s | epoch eta 0.2 min
+2026-11-27 22:30:45 | INFO    | epoch 11/30 | train loss 0.6834 acc 0.7880 | val_a loss 0.7143 acc 0.7797 (best) | 98s
+2026-11-27 22:31:01 | INFO    | epoch 12 step 500/2929 | loss 0.6603 | acc 0.7941 | lr 1.45e-03 | 15698 blocks/s | epoch eta 1.3 min
+2026-11-27 22:31:18 | INFO    | epoch 12 step 1000/2929 | loss 0.6656 | acc 0.7922 | lr 1.44e-03 | 15687 blocks/s | epoch eta 1.0 min
+2026-11-27 22:31:34 | INFO    | epoch 12 step 1500/2929 | loss 0.6705 | acc 0.7909 | lr 1.42e-03 | 15684 blocks/s | epoch eta 0.8 min
+2026-11-27 22:31:50 | INFO    | epoch 12 step 2000/2929 | loss 0.6733 | acc 0.7902 | lr 1.40e-03 | 15681 blocks/s | epoch eta 0.5 min
+2026-11-27 22:32:06 | INFO    | epoch 12 step 2500/2929 | loss 0.6744 | acc 0.7901 | lr 1.38e-03 | 15688 blocks/s | epoch eta 0.2 min
+2026-11-27 22:32:23 | INFO    | epoch 12/30 | train loss 0.6750 acc 0.7901 | val_a loss 0.7091 acc 0.7798 (best) | 98s
+2026-11-27 22:32:40 | INFO    | epoch 13 step 500/2929 | loss 0.6534 | acc 0.7960 | lr 1.35e-03 | 15645 blocks/s | epoch eta 1.3 min
+2026-11-27 22:32:56 | INFO    | epoch 13 step 1000/2929 | loss 0.6563 | acc 0.7953 | lr 1.34e-03 | 15657 blocks/s | epoch eta 1.1 min
+2026-11-27 22:33:12 | INFO    | epoch 13 step 1500/2929 | loss 0.6604 | acc 0.7940 | lr 1.32e-03 | 15663 blocks/s | epoch eta 0.8 min
+2026-11-27 22:33:29 | INFO    | epoch 13 step 2000/2929 | loss 0.6622 | acc 0.7933 | lr 1.30e-03 | 15665 blocks/s | epoch eta 0.5 min
+2026-11-27 22:33:45 | INFO    | epoch 13 step 2500/2929 | loss 0.6643 | acc 0.7928 | lr 1.28e-03 | 15667 blocks/s | epoch eta 0.2 min
+2026-11-27 22:34:02 | INFO    | epoch 13/30 | train loss 0.6657 acc 0.7924 | val_a loss 0.7194 acc 0.7791 | 98s
+2026-11-27 22:34:18 | INFO    | epoch 14 step 500/2929 | loss 0.6413 | acc 0.7989 | lr 1.25e-03 | 15722 blocks/s | epoch eta 1.3 min
+2026-11-27 22:34:34 | INFO    | epoch 14 step 1000/2929 | loss 0.6467 | acc 0.7976 | lr 1.23e-03 | 15748 blocks/s | epoch eta 1.0 min
+2026-11-27 22:34:50 | INFO    | epoch 14 step 1500/2929 | loss 0.6520 | acc 0.7961 | lr 1.21e-03 | 15766 blocks/s | epoch eta 0.8 min
+2026-11-27 22:35:07 | INFO    | epoch 14 step 2000/2929 | loss 0.6544 | acc 0.7957 | lr 1.20e-03 | 15769 blocks/s | epoch eta 0.5 min
+2026-11-27 22:35:23 | INFO    | epoch 14 step 2500/2929 | loss 0.6559 | acc 0.7954 | lr 1.18e-03 | 15774 blocks/s | epoch eta 0.2 min
+2026-11-27 22:35:39 | INFO    | epoch 14/30 | train loss 0.6567 acc 0.7950 | val_a loss 0.7078 acc 0.7823 (best) | 98s
+2026-11-27 22:35:56 | INFO    | epoch 15 step 500/2929 | loss 0.6329 | acc 0.8018 | lr 1.14e-03 | 15815 blocks/s | epoch eta 1.3 min
+2026-11-27 22:36:12 | INFO    | epoch 15 step 1000/2929 | loss 0.6359 | acc 0.8008 | lr 1.13e-03 | 15814 blocks/s | epoch eta 1.0 min
+2026-11-27 22:36:28 | INFO    | epoch 15 step 1500/2929 | loss 0.6399 | acc 0.7998 | lr 1.11e-03 | 15810 blocks/s | epoch eta 0.8 min
+2026-11-27 22:36:44 | INFO    | epoch 15 step 2000/2929 | loss 0.6430 | acc 0.7990 | lr 1.09e-03 | 15793 blocks/s | epoch eta 0.5 min
+2026-11-27 22:37:01 | INFO    | epoch 15 step 2500/2929 | loss 0.6446 | acc 0.7984 | lr 1.07e-03 | 15778 blocks/s | epoch eta 0.2 min
+2026-11-27 22:37:17 | INFO    | epoch 15/30 | train loss 0.6464 acc 0.7977 | val_a loss 0.6949 acc 0.7856 (best) | 98s
+2026-11-27 22:37:34 | INFO    | epoch 16 step 500/2929 | loss 0.6222 | acc 0.8045 | lr 1.04e-03 | 15676 blocks/s | epoch eta 1.3 min
+2026-11-27 22:37:50 | INFO    | epoch 16 step 1000/2929 | loss 0.6264 | acc 0.8034 | lr 1.02e-03 | 15681 blocks/s | epoch eta 1.0 min
+2026-11-27 22:38:06 | INFO    | epoch 16 step 1500/2929 | loss 0.6307 | acc 0.8021 | lr 9.99e-04 | 15679 blocks/s | epoch eta 0.8 min
+2026-11-27 22:38:23 | INFO    | epoch 16 step 2000/2929 | loss 0.6319 | acc 0.8016 | lr 9.80e-04 | 15676 blocks/s | epoch eta 0.5 min
+2026-11-27 22:38:39 | INFO    | epoch 16 step 2500/2929 | loss 0.6343 | acc 0.8009 | lr 9.62e-04 | 15676 blocks/s | epoch eta 0.2 min
+2026-11-27 22:38:56 | INFO    | epoch 16/30 | train loss 0.6358 acc 0.8004 | val_a loss 0.6941 acc 0.7860 (best) | 98s
+2026-11-27 22:39:12 | INFO    | epoch 17 step 500/2929 | loss 0.6099 | acc 0.8083 | lr 9.27e-04 | 15614 blocks/s | epoch eta 1.3 min
+2026-11-27 22:39:28 | INFO    | epoch 17 step 1000/2929 | loss 0.6169 | acc 0.8058 | lr 9.09e-04 | 15649 blocks/s | epoch eta 1.1 min
+2026-11-27 22:39:45 | INFO    | epoch 17 step 1500/2929 | loss 0.6187 | acc 0.8055 | lr 8.91e-04 | 15614 blocks/s | epoch eta 0.8 min
+2026-11-27 22:40:01 | INFO    | epoch 17 step 2000/2929 | loss 0.6213 | acc 0.8046 | lr 8.72e-04 | 15629 blocks/s | epoch eta 0.5 min
+2026-11-27 22:40:17 | INFO    | epoch 17 step 2500/2929 | loss 0.6230 | acc 0.8041 | lr 8.54e-04 | 15641 blocks/s | epoch eta 0.2 min
+2026-11-27 22:40:34 | INFO    | epoch 17/30 | train loss 0.6243 acc 0.8037 | val_a loss 0.6933 acc 0.7874 (best) | 98s
+2026-11-27 22:40:50 | INFO    | epoch 18 step 500/2929 | loss 0.5979 | acc 0.8115 | lr 8.20e-04 | 15728 blocks/s | epoch eta 1.3 min
+2026-11-27 22:41:07 | INFO    | epoch 18 step 1000/2929 | loss 0.6025 | acc 0.8099 | lr 8.02e-04 | 15732 blocks/s | epoch eta 1.0 min
+2026-11-27 22:41:23 | INFO    | epoch 18 step 1500/2929 | loss 0.6065 | acc 0.8089 | lr 7.84e-04 | 15734 blocks/s | epoch eta 0.8 min
+2026-11-27 22:41:39 | INFO    | epoch 18 step 2000/2929 | loss 0.6096 | acc 0.8079 | lr 7.66e-04 | 15730 blocks/s | epoch eta 0.5 min
+2026-11-27 22:41:56 | INFO    | epoch 18 step 2500/2929 | loss 0.6109 | acc 0.8075 | lr 7.48e-04 | 15706 blocks/s | epoch eta 0.2 min
+2026-11-27 22:42:12 | INFO    | epoch 18/30 | train loss 0.6117 acc 0.8071 | val_a loss 0.6943 acc 0.7867 | 98s
+2026-11-27 22:42:29 | INFO    | epoch 19 step 500/2929 | loss 0.5849 | acc 0.8154 | lr 7.15e-04 | 15724 blocks/s | epoch eta 1.3 min
+2026-11-27 22:42:45 | INFO    | epoch 19 step 1000/2929 | loss 0.5896 | acc 0.8136 | lr 6.97e-04 | 15720 blocks/s | epoch eta 1.0 min
+2026-11-27 22:43:01 | INFO    | epoch 19 step 1500/2929 | loss 0.5928 | acc 0.8125 | lr 6.79e-04 | 15719 blocks/s | epoch eta 0.8 min
+2026-11-27 22:43:18 | INFO    | epoch 19 step 2000/2929 | loss 0.5947 | acc 0.8119 | lr 6.62e-04 | 15720 blocks/s | epoch eta 0.5 min
+2026-11-27 22:43:34 | INFO    | epoch 19 step 2500/2929 | loss 0.5964 | acc 0.8115 | lr 6.45e-04 | 15720 blocks/s | epoch eta 0.2 min
+2026-11-27 22:43:51 | INFO    | epoch 19/30 | train loss 0.5977 acc 0.8112 | val_a loss 0.6950 acc 0.7869 | 98s
+2026-11-27 22:44:07 | INFO    | epoch 20 step 500/2929 | loss 0.5687 | acc 0.8194 | lr 6.13e-04 | 15677 blocks/s | epoch eta 1.3 min
+2026-11-27 22:44:23 | INFO    | epoch 20 step 1000/2929 | loss 0.5741 | acc 0.8178 | lr 5.96e-04 | 15670 blocks/s | epoch eta 1.1 min
+2026-11-27 22:44:40 | INFO    | epoch 20 step 1500/2929 | loss 0.5767 | acc 0.8169 | lr 5.79e-04 | 15662 blocks/s | epoch eta 0.8 min
+2026-11-27 22:44:56 | INFO    | epoch 20 step 2000/2929 | loss 0.5795 | acc 0.8163 | lr 5.62e-04 | 15659 blocks/s | epoch eta 0.5 min
+2026-11-27 22:45:12 | INFO    | epoch 20 step 2500/2929 | loss 0.5815 | acc 0.8158 | lr 5.46e-04 | 15662 blocks/s | epoch eta 0.2 min
+2026-11-27 22:45:29 | INFO    | epoch 20/30 | train loss 0.5828 acc 0.8154 | val_a loss 0.6941 acc 0.7863 | 98s
+2026-11-27 22:45:45 | INFO    | epoch 21 step 500/2929 | loss 0.5528 | acc 0.8248 | lr 5.15e-04 | 15679 blocks/s | epoch eta 1.3 min
+2026-11-27 22:46:02 | INFO    | epoch 21 step 1000/2929 | loss 0.5548 | acc 0.8244 | lr 4.99e-04 | 15677 blocks/s | epoch eta 1.1 min
+2026-11-27 22:46:18 | INFO    | epoch 21 step 1500/2929 | loss 0.5603 | acc 0.8225 | lr 4.83e-04 | 15675 blocks/s | epoch eta 0.8 min
+2026-11-27 22:46:34 | INFO    | epoch 21 step 2000/2929 | loss 0.5629 | acc 0.8217 | lr 4.68e-04 | 15673 blocks/s | epoch eta 0.5 min
+2026-11-27 22:46:51 | INFO    | epoch 21 step 2500/2929 | loss 0.5650 | acc 0.8210 | lr 4.52e-04 | 15667 blocks/s | epoch eta 0.2 min
+2026-11-27 22:47:08 | INFO    | epoch 21/30 | train loss 0.5656 acc 0.8207 | val_a loss 0.6973 acc 0.7873 | 98s
+2026-11-27 22:47:24 | INFO    | epoch 22 step 500/2929 | loss 0.5347 | acc 0.8298 | lr 4.24e-04 | 15730 blocks/s | epoch eta 1.3 min
+2026-11-27 22:47:40 | INFO    | epoch 22 step 1000/2929 | loss 0.5360 | acc 0.8296 | lr 4.09e-04 | 15726 blocks/s | epoch eta 1.0 min
+2026-11-27 22:47:56 | INFO    | epoch 22 step 1500/2929 | loss 0.5406 | acc 0.8281 | lr 3.94e-04 | 15707 blocks/s | epoch eta 0.8 min
+2026-11-27 22:48:13 | INFO    | epoch 22 step 2000/2929 | loss 0.5437 | acc 0.8271 | lr 3.79e-04 | 15692 blocks/s | epoch eta 0.5 min
+2026-11-27 22:48:29 | INFO    | epoch 22 step 2500/2929 | loss 0.5461 | acc 0.8263 | lr 3.65e-04 | 15683 blocks/s | epoch eta 0.2 min
+2026-11-27 22:48:46 | INFO    | epoch 22/30 | train loss 0.5479 acc 0.8258 | val_a loss 0.6963 acc 0.7868 | 98s
+2026-11-27 22:48:46 | INFO    | training ended (early stop) after 22 epochs; best val_a acc 0.7874 at epoch 17
+2026-11-27 22:49:09 | INFO    | saved logits for val_a, val_b, test, ood_aes_ctr, ood_random
+2026-11-27 22:49:09 | INFO    | cnn_m_s0 done | test accuracy 0.7861 | macro-F1 0.7878

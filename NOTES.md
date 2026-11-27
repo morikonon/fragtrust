@@ -12,6 +12,18 @@ Running log of methodological choices; the Methodology section is written from i
 - Exact-duplicate check: BLAKE2b-64 hash of every block of the official train and test files;
   reported for the official split and for our subset. FiFTy splits at block level, so duplicates
   across splits are possible.
+- Effect of the duplicates (N5): `prepare` saves a boolean mask per test block,
+  `test_duplicates.npz` with `official_train` (block also in the official train split) and
+  `subset_train` (also in our training subset, i.e. the leakage our models actually saw; always a
+  subset of the first). `analyze` reports accuracy, macro-F1 and ECE after temperature scaling on all
+  test blocks, on the duplicated blocks and on the test set without them, for both masks. Reason: a
+  2.1 % overlap can only inflate the headline accuracy if the model does much better on the
+  duplicates, which this measures directly. Macro-F1 of a group is averaged over the classes present
+  in that group. The ECE of the duplicated group (≈ 16k blocks, unevenly spread over the 15 bins) is
+  noisier than on the full test set; read the accuracy difference first. Datasets prepared before the
+  masks existed get them from `fragtrust duplicates` (one hashing pass over the official train file;
+  the counts must reproduce `leakage.json`, otherwise it stops); without the file `analyze` logs that
+  and skips the breakdown (synthetic data).
 
 ## Models and training
 - No label smoothing, mixup or other regularisers that change confidence: the study measures calibration.
@@ -31,13 +43,27 @@ Running log of methodological choices; the Methodology section is written from i
   entropy also reported). Thresholds for 95 % and 99 % target accuracy fitted on val_b in two ways:
   empirical (largest coverage meeting the target) and Learn-then-Test fixed-sequence binomial
   testing with δ = 0.05, which bounds the selective error with probability ≥ 95 %. Accepted-set sizes
-  smaller than the minimum that can pass the test even with zero errors are skipped; that minimum
-  depends only on n, target and δ.
+  smaller than the minimum that can pass the test even with zero errors are skipped; that minimum,
+  m_min = ⌈log δ / log(1 − (1 − target))⌉ (59 at 95 %, 299 at 99 % for δ = 0.05), depends only on
+  target and δ, and no threshold exists if val_b has fewer than m_min blocks. `trust.json` records
+  m_min per target and the calibration size n_cal.
+- A target counts as met only if the threshold answers at least one test block and the accuracy of
+  the answers reaches the target. Reason: abstaining on everything trivially has no errors; counting
+  it as a pass made "meets the target" true exactly when the guarantee is useless. The number of
+  answered blocks is recorded with every threshold, and tables print "no answers" for such cases.
 - Conformal sets on val_b with α ∈ {0.10, 0.05}: LAC, randomised APS, RAPS with λ = 0.01 and
   k_reg = 2 fixed in advance (not tuned). Reported: coverage, set size, per-class coverage.
 - OOD probes (never in training): 20,000 AES-256-CTR encryptions of random test blocks (one key, a
   fresh nonce per block) and 20,000 uniformly random blocks. AUROC against the test split using MSP,
   entropy and (networks only) energy; energy is undefined for log-probabilities.
+- Model-free baseline for the probes: AUROC of the byte entropy of the block itself (bits per byte,
+  higher = more likely a probe). Reason: AES-CTR and random blocks have near-maximal entropy
+  (≈ 7.955 bits), which a plain threshold can detect without any model; a model score adds
+  information only where it beats this baseline.
+- Duplicate breakdown in `trust.json`: `duplicates/<side>/<group>/{n,accuracy,macro_f1,ece}` with
+  side `official_train` or `subset_train` and group `all`, `duplicated` or `without`; plus
+  `duplicates/<side>/all_minus_without/{accuracy,macro_f1,ece}` (positive accuracy = duplicates
+  inflate it). Empty groups have `n` 0 and null metrics. Table `duplicates` in the report.
 - Entropy bins up to 8 bits with fine bins near the top, because uniformly random 4096-byte blocks
   have an expected empirical entropy of about 8 − 255/(2·4096·ln 2) ≈ 7.955 bits.
 
@@ -72,8 +98,10 @@ Running log of methodological choices; the Methodology section is written from i
   (true type in the candidate set), mean candidate-set size.
 - Recalibration: 20 % of the image's labelled files (grouped by file, so clusters of one file never
   fall on both sides) refit temperature, Learn-then-Test thresholds and conformal quantiles; both the
-  transferred and the refitted parameters are evaluated on the other 80 %. 20 random splits, mean ± std
-  and the share of splits whose answers meet the 99 % target.
+  transferred and the refitted parameters are evaluated on the other 80 %. 20 random splits, mean ± std,
+  the share of splits whose answers meet the 99 % target (at least one answer, see Trust analysis) and,
+  separately, the share of splits where the threshold answers nothing (`no_answers@t`; `answered@t`
+  is the count per split and group).
 - `case-simulate` builds an image from test blocks of a processed dataset for smoke tests only; its
   "files" are not real files, so it is never used for the paper.
 

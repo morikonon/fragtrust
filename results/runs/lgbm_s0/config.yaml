@@ -1,0 +1,27 @@
+name: lgbm
+data:
+  dir: data/processed/fft75_4096_s1_v1
+model:
+  type: lightgbm
+params:
+  max_bin: 63
+  min_data_in_leaf: 50
+  feature_fraction: 0.8
+  bagging_fraction: 0.8
+  bagging_freq: 1
+  lambda_l2: 1.0
+grid:
+  num_leaves:
+  - 63
+  - 127
+  learning_rate:
+  - 0.05
+  - 0.1
+tune:
+  train_per_class: 5000
+  seed: 0
+boost:
+  num_boost_round: 3000
+  early_stopping: 50
+  log_every: 25
+threads: null

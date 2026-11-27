@@ -15,16 +15,20 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import f1_score
 
 from ..config import RunDir
-from ..data.store import EVAL_SPLITS, PROBES, FragmentStore
+from ..data.store import DUPLICATES_FILE, EVAL_SPLITS, PROBES, FragmentStore
+from ..features import block_entropy
 from ..runtime import setup_logging, write_json
-from .calibration import calibration_report, fit_temperature, probs, reliability
+from .calibration import calibration_report, ece, fit_temperature, probs, reliability
 from .conformal import ConformalPredictor, set_metrics
 from .ood import anomaly_score, auroc
 from .selective import risk_coverage, selective_report
 
 log = logging.getLogger(__name__)
+
+GROUPS = ("all", "duplicated", "without")
 
 
 @dataclass(frozen=True)
@@ -48,8 +52,46 @@ def _ltt_threshold(selective: dict[str, Any], target: float) -> float | None:
     return selective["msp"]["targets"][f"{target:.2f}"]["ltt"]["threshold"]
 
 
+def _dec4(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:.4f}"
+
+
 def _abstained(conf: np.ndarray, threshold: float | None) -> float:
     return 1.0 if threshold is None else float((conf < threshold).mean())
+
+
+def group_metrics(y: np.ndarray, pred: np.ndarray, conf: np.ndarray, n_bins: int) -> dict[str, Any]:
+    """Accuracy, macro-F1 over the classes present and ECE of a group of test blocks."""
+    if not len(y):
+        return {"n": 0, "accuracy": None, "macro_f1": None, "ece": None}
+    correct = pred == y
+    return {
+        "n": len(y),
+        "accuracy": float(correct.mean()),
+        "macro_f1": float(f1_score(y, pred, labels=np.unique(y), average="macro", zero_division=0)),
+        "ece": ece(conf, correct, n_bins),
+    }
+
+
+def duplicate_effect(
+    y: np.ndarray, pred: np.ndarray, conf: np.ndarray, masks: dict[str, np.ndarray], n_bins: int
+) -> dict[str, Any]:
+    """Per train side: metrics on all test blocks, on those duplicated in train, and on the rest."""
+    every = group_metrics(y, pred, conf, n_bins)
+    report = {}
+    for side, mask in masks.items():
+        if len(mask) != len(y):
+            raise ValueError(f"{side} duplicate mask has {len(mask)} entries for {len(y)} test blocks")
+        without = group_metrics(y[~mask], pred[~mask], conf[~mask], n_bins)
+        report[side] = {
+            "all": every,
+            "duplicated": group_metrics(y[mask], pred[mask], conf[mask], n_bins),
+            "without": without,
+            "all_minus_without": {
+                k: None if without[k] is None else every[k] - without[k] for k in ("accuracy", "macro_f1", "ece")
+            },
+        }
+    return report
 
 
 def analyze(run_path: Path, opts: AnalysisOptions = AnalysisOptions()) -> dict[str, Any]:
@@ -80,6 +122,16 @@ def analyze(run_path: Path, opts: AnalysisOptions = AnalysisOptions()) -> dict[s
         )
     del raw_test
 
+    masks = data.test_duplicates()
+    if masks is None:
+        log.info("%s: no %s in %s (prepared before the masks existed, or synthetic data): duplicate breakdown "
+                 "skipped; `fragtrust duplicates` adds it", run.id, DUPLICATES_FILE, data.root)
+    else:
+        report["duplicates"] = duplicate_effect(y["test"], p["test"].argmax(axis=1), conf["test"], masks, opts.ece_bins)
+        for side, d in report["duplicates"].items():
+            log.info("%s: %s duplicates %s | accuracy all / duplicated / without %s | ECE (TS) %s", run.id, side,
+                     f"{d['duplicated']['n']:,}", *(" / ".join(_dec4(d[g][k]) for g in GROUPS) for k in ("accuracy", "ece")))
+
     scores = {"msp": conf, "neg_entropy": {s: -_entropy(p[s]) for s in ("val_b", "test")}}
     report["selective"] = {
         name: selective_report(sc["val_b"], correct["val_b"], sc["test"], correct["test"], opts.targets, opts.delta)
@@ -106,11 +158,12 @@ def analyze(run_path: Path, opts: AnalysisOptions = AnalysisOptions()) -> dict[s
     main_sizes = test_sets[opts.main_conformal].sum(axis=1)
     del test_sets
 
+    test_entropy = data.test_entropy()
     tau99 = _ltt_threshold(report["selective"], max(opts.targets))
     entropy_bins = (
         pd.DataFrame(
             {
-                "bin": pd.cut(data.test_entropy(), list(opts.entropy_edges), right=False),
+                "bin": pd.cut(test_entropy, list(opts.entropy_edges), right=False),
                 "correct": correct["test"],
                 "confidence": conf["test"],
                 "accepted": conf["test"] >= tau99 if tau99 is not None else False,
@@ -136,10 +189,15 @@ def analyze(run_path: Path, opts: AnalysisOptions = AnalysisOptions()) -> dict[s
     for probe in PROBES:
         predicted = pd.Series(p[probe].argmax(axis=1)).map(dict(enumerate(data.class_names)))
         sets, _ = set_metrics(main_cp.predict(p[probe], rng))
+        model_auroc = {k: auroc(id_scores[k], anomaly_score(logits[probe], temperature, k)) for k in kinds}
+        # model-free baseline: does a plain entropy threshold already separate the probe?
+        entropy_auroc = auroc(test_entropy, block_entropy(data.x(probe)))
+        log.info("%s: %s AUROC %s, byte entropy %.4f", run.id, probe,
+                 ", ".join(f"{k} {v:.4f}" for k, v in model_auroc.items()), entropy_auroc)
         report["ood"][probe] = {
             "n": len(p[probe]),
             "mean_confidence": float(conf[probe].mean()),
-            "auroc": {k: auroc(id_scores[k], anomaly_score(logits[probe], temperature, k)) for k in kinds},
+            "auroc": {**model_auroc, "byte_entropy": entropy_auroc},
             "abstained": {
                 f"{t:.2f}": _abstained(conf[probe], _ltt_threshold(report["selective"], t)) for t in opts.targets
             },

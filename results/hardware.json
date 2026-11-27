@@ -1,0 +1,31 @@
+{
+  "host": "vm-tesla",
+  "platform": "Linux-6.5.0-1017-gcp-x86_64-with-glibc2.35",
+  "python": "3.10.12",
+  "cpu": "Intel(R) Xeon(R) Gold 6354 CPU @ 3.00GHz",
+  "cpu_count": 40,
+  "cpus_available": 40,
+  "ram_gb": 503.7,
+  "cuda": "12.4",
+  "mps": false,
+  "gpus": [
+    {
+      "name": "NVIDIA A100-PCIE-40GB",
+      "memory_gb": 39.4
+    }
+  ],
+  "packages": {
+    "numpy": "2.2.6",
+    "pandas": "2.3.3",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2",
+    "lightgbm": "4.7.0",
+    "torch": "2.6.0+cu124",
+    "cryptography": "50.0.2",
+    "pyyaml": "6.0.4",
+    "matplotlib": "3.10.9",
+    "onnx": "1.23.2",
+    "onnxruntime": "1.23.2"
+  },
+  "cudnn": 90100
+}

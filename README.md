@@ -187,6 +187,7 @@ result skip it if it exists; `--force` redoes it.
 |---|---|
 | `env` | hardware and package versions → `results/hardware.json`, `results/environment.txt` |
 | `prepare --config C` | stratified subset of the official files, duplicate check, entropy, OOD probes |
+| `duplicates --config C` | per-test-block duplicate masks for a dataset prepared before they existed (one pass over the official train file, nothing rebuilt) |
 | `synth --config C` | synthetic dataset in the same format |
 | `tune --config C` | LightGBM grid on a training subsample, selected by val_a log-loss |
 | `train --config C --seed 0 1 2` | one run per seed: weights, logits, metrics, logs |
@@ -209,7 +210,8 @@ result skip it if it exists; `--force` redoes it.
 results/
   hardware.json, environment.txt
   logs/                  base_plan.log, lgbm.out, case_study.log
-  data/<dataset>/        prepare.log, manifest.json, class_balance.csv, leakage.json, leakage_per_class.csv
+  data/<dataset>/        prepare.log, manifest.json, class_balance.csv, leakage.json, leakage_per_class.csv,
+                         duplicates.log
   tuning/lgbm/           tune.log, grid.csv, best.json
   runs/<model>_s<seed>/
     config.yaml          exact config of the run

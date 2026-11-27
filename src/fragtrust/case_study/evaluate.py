@@ -22,7 +22,7 @@ from ..data.store import FragmentStore
 from ..runtime import read_json, setup_logging, write_json
 from ..trust.calibration import ece, fit_temperature, probs
 from ..trust.conformal import ConformalPredictor
-from ..trust.selective import apply_threshold, fit_threshold
+from ..trust.selective import apply_threshold, fit_threshold, meets_target
 from .build import load_build
 from .ground_truth import NOT_EVIDENCE
 from .scan import case_dir, signature_table
@@ -75,7 +75,13 @@ def trust_metrics(params: TrustParams, logits: np.ndarray, y: np.ndarray, rng: n
     for t, tau in params.thresholds.items():
         result = apply_threshold(conf, correct, tau)
         acc = result["selective_accuracy"]
-        out |= {f"coverage@{t:.2f}": result["coverage"], f"selective_accuracy@{t:.2f}": acc, f"meets@{t:.2f}": acc is None or acc >= t}
+        out |= {
+            f"coverage@{t:.2f}": result["coverage"],
+            f"answered@{t:.2f}": result["answered"],
+            f"no_answers@{t:.2f}": result["answered"] == 0,
+            f"selective_accuracy@{t:.2f}": acc,
+            f"meets@{t:.2f}": meets_target(acc, t),
+        }
     for cp in params.conformal.values():
         sets = cp.predict(p, rng)
         out |= {f"{cp.name}_coverage": float(sets[np.arange(len(y)), y].mean()), f"{cp.name}_size": float(sets.sum(axis=1).mean())}

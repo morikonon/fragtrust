@@ -15,7 +15,9 @@ from fragtrust.data.store import FragmentStore
 from fragtrust.experiment import train
 from fragtrust.features import N_FEATURES
 from fragtrust.inference import load_booster
-from fragtrust.report import build_assets
+from fragtrust.report import build_assets, tables
+from fragtrust.report.collect import Results
+from fragtrust.report.figures import Context
 from fragtrust.report.numbers import check
 from fragtrust.runtime import read_json, write_json
 
@@ -77,6 +79,72 @@ def test_report_builds_every_available_asset(case, tmp_path):
         assert all(Path(path).exists() for path in asset["files"]), name
     assets = json.loads((tmp_path / "paper" / "assets.json").read_text())
     assert set(assets["assets"]) == set(built)
+    ood = pd.read_csv(tmp_path / "paper" / "tables" / "ood.csv")
+    assert ood["AUROC (byte entropy)"].between(0, 1).all()
+
+
+def _ltt(answered: int, accuracy: float | None, met: bool) -> dict:
+    return {"ltt": {"answered": answered, "coverage": answered / 100, "selective_accuracy": accuracy, "meets_target": met},
+            "empirical": {"coverage": 0.5}}
+
+
+def _split_summary(coverage: float, accuracy: float, met: float, no_answers: float) -> dict:
+    means = {"temperature": 1.0, "coverage@0.99": coverage, "selective_accuracy@0.99": accuracy, "meets@0.99": met,
+             "no_answers@0.99": no_answers, "aps@0.95_coverage": 0.95, "aps@0.95_size": 1.2}
+    return {key: {"mean": mean, "std": float("nan")} for key, mean in means.items()}
+
+
+def test_tables_show_no_answers_instead_of_a_pass(tmp_path):
+    results = tmp_path / "results"
+    for seed, target99 in ((0, _ltt(40, 0.995, True)), (1, _ltt(0, None, False))):
+        run = results / "runs" / f"m_s{seed}"
+        write_json(run / "meta.json", {"model": "m", "seed": seed})
+        write_json(run / "analysis" / "trust.json", {"selective": {"msp": {"aurc": 0.01, "targets": {"0.95": _ltt(90, 0.96, True), "0.99": target99}}}})
+        (run / "DONE").write_text("done\n")
+    write_json(results / "case_study" / "img" / "m_s0" / "case_study.json", {"recalibration": {
+        "cal_fraction": 0.2,
+        "transferred": _split_summary(0.6, 0.995, 0.75, 0.0),
+        "recalibrated": _split_summary(0.0, float("nan"), 0.0, 1.0),
+    }})
+    ctx = Context(Results(results), {"models": {"m": "M"}, "case_study": {"image": "img", "runs": {"m_s0": "M"}}}, tmp_path, [])
+
+    selective = tables.selective(ctx)[0].iloc[0]
+    assert selective["Met 95%"] == "2/2"
+    assert selective["Met 99%"] == "1/2 (1 no answers)"
+    recal = tables.recalibration(ctx)[0].set_index("Fitted on")
+    assert recal.loc["20% of image files", "Accuracy of answers (%)"] == "no answers"
+    assert recal.loc["20% of image files", "Splits meeting 99% (%)"] == "0.00"
+    assert recal.loc["20% of image files", "Splits with no answers at 99% (%)"] == "100.00"
+    assert recal.loc["FFT-75 (transferred)", "Accuracy of answers (%)"] == "99.50"
+
+
+def _groups(n_dup: int, acc_dup: float | None) -> dict:
+    return {
+        "all": {"n": 100, "accuracy": 0.8, "macro_f1": 0.79, "ece": 0.02},
+        "duplicated": {"n": n_dup, "accuracy": acc_dup, "macro_f1": acc_dup, "ece": None if acc_dup is None else 0.01},
+        "without": {"n": 100 - n_dup, "accuracy": 0.79, "macro_f1": 0.78, "ece": 0.021},
+        "all_minus_without": {"accuracy": 0.01, "macro_f1": 0.01, "ece": -0.001},
+    }
+
+
+def test_duplicates_table_lists_both_train_sides_and_skips_runs_without_masks(tmp_path):
+    results = tmp_path / "results"
+    docs = {"m": {"duplicates": {"official_train": _groups(10, 0.99), "subset_train": _groups(0, None)}}, "old": {}}
+    for model, doc in docs.items():
+        run = results / "runs" / f"{model}_s0"
+        write_json(run / "meta.json", {"model": model, "seed": 0})
+        write_json(run / "analysis" / "trust.json", doc)
+        (run / "DONE").write_text("done\n")
+    ctx = Context(Results(results), {"models": {"m": "M", "old": "Old"}}, tmp_path, [])
+
+    table = tables.duplicates(ctx)[0].set_index("Duplicated in")
+    assert table["Model"].tolist() == ["M", "M"]
+    assert table.loc["official train", "Accuracy duplicated (%)"] == "99.00"
+    assert table.loc["official train", "All − without (pp)"] == "1.00"
+    assert table.loc["our train subset", "Duplicated test blocks"] == "0"
+    assert table.loc["our train subset", "Accuracy duplicated (%)"] == "–"
+    ctx = Context(Results(results), {"models": {"old": "Old"}}, tmp_path, [])
+    assert tables.duplicates(ctx) is None
 
 
 def test_numbers_resolve_tags_and_flag_typed_numbers(tmp_path):

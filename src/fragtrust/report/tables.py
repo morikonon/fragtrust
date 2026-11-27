@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from pathlib import Path
 
@@ -15,16 +16,26 @@ from .numbers import rounded
 Table = tuple[pd.DataFrame, list[str]]
 
 PCT, DEC3, DEC2, INT, MB = "pct", "dec3", "dec2", "int", "mb"
+NO_ANSWERS = "no answers"
+
+
+def _missing(value: float | None) -> bool:
+    return value is None or math.isnan(value)
 
 
 def fmt(mean: float | None, std: float | None = None, kind: str = PCT) -> str:
-    if mean is None:
+    if _missing(mean):
         return "–"
     if kind == INT:
         return f"{mean:,.0f}"
     scale, digits = {PCT: (100, 2), DEC3: (1, 3), DEC2: (1, 2), MB: (1e-6, 2)}[kind]
     text = rounded(mean, digits, scale)
-    return text if std is None else f"{text} ± {rounded(std, digits, scale)}"
+    return text if _missing(std) else f"{text} ± {rounded(std, digits, scale)}"
+
+
+def fmt_answers(accuracy: float | None, std: float | None = None) -> str:
+    """Accuracy of answers; None/NaN there means the threshold answered nothing."""
+    return NO_ANSWERS if _missing(accuracy) else fmt(accuracy, std)
 
 
 def to_markdown(df: pd.DataFrame) -> str:
@@ -82,6 +93,30 @@ def leakage(ctx: Context) -> Table | None:
     return pd.DataFrame(rows), [str(path)]
 
 
+def duplicates(ctx: Context) -> Table | None:
+    """Does accuracy depend on test blocks that also occur in train? Runs analysed with duplicate masks only."""
+    models = {m: label for m, label in _with_runs(ctx).items() if "duplicates" in ctx.results.doc(ctx.results.first(m), "trust")}
+    if not models:
+        return None
+    rows = []
+    for model, label in models.items():
+        for side, side_label in (("official_train", "official train"), ("subset_train", "our train subset")):
+            base = ("duplicates", side)
+            rows.append({
+                "Model": label,
+                "Duplicated in": side_label,
+                "Duplicated test blocks": _cell(ctx, model, "trust", base + ("duplicated", "n"), INT),
+                "Accuracy all (%)": _cell(ctx, model, "trust", base + ("all", "accuracy")),
+                "Accuracy duplicated (%)": _cell(ctx, model, "trust", base + ("duplicated", "accuracy")),
+                "Accuracy without (%)": _cell(ctx, model, "trust", base + ("without", "accuracy")),
+                "All − without (pp)": _cell(ctx, model, "trust", base + ("all_minus_without", "accuracy")),
+                "Macro-F1 without (%)": _cell(ctx, model, "trust", base + ("without", "macro_f1")),
+                "ECE (TS) duplicated": _cell(ctx, model, "trust", base + ("duplicated", "ece"), DEC3),
+                "ECE (TS) without": _cell(ctx, model, "trust", base + ("without", "ece"), DEC3),
+            })
+    return pd.DataFrame(rows), _trust_sources(ctx, models)
+
+
 def main_results(ctx: Context) -> Table | None:
     models = _models(ctx)
     if not models:
@@ -134,16 +169,23 @@ def selective(ctx: Context) -> Table | None:
         row = {"Model": label, "AURC": _cell(ctx, model, "trust", ("selective", "msp", "aurc"), DEC3)}
         for target in ("0.95", "0.99"):
             base = ("selective", "msp", "targets", target)
-            met = ctx.results.values(model, "trust", base + ("ltt", "meets_target"))
             pct = target[2:]
             row |= {
                 f"Coverage {pct}% (LTT)": _cell(ctx, model, "trust", base + ("ltt", "coverage")),
-                f"Accuracy {pct}% (LTT)": _cell(ctx, model, "trust", base + ("ltt", "selective_accuracy")),
-                f"Met {pct}%": f"{sum(bool(v) for v in met)}/{len(met)}",
+                f"Accuracy {pct}% (LTT)": fmt_answers(*ctx.results.stat(model, "trust", base + ("ltt", "selective_accuracy"))),
+                f"Met {pct}%": _met(ctx, model, base + ("ltt",)),
                 f"Coverage {pct}% (empirical)": _cell(ctx, model, "trust", base + ("empirical", "coverage")),
             }
         rows.append(row)
     return pd.DataFrame(rows), _trust_sources(ctx, models)
+
+
+def _met(ctx: Context, model: str, path: tuple[str, ...]) -> str:
+    """Seeds meeting the target out of all seeds; seeds that answered nothing are counted apart."""
+    met = ctx.results.values(model, "trust", path + ("meets_target",))
+    silent = sum(v == 0 for v in ctx.results.values(model, "trust", path + ("answered",)))
+    text = f"{sum(bool(v) for v in met)}/{len(met)}"
+    return f"{text} ({silent} {NO_ANSWERS})" if silent else text
 
 
 def conformal(ctx: Context) -> Table | None:
@@ -186,6 +228,7 @@ def ood(ctx: Context) -> Table | None:
                 "AUROC (MSP)": _cell(ctx, model, "trust", base + ("auroc", "msp"), DEC3),
                 "AUROC (entropy)": _cell(ctx, model, "trust", base + ("auroc", "entropy"), DEC3),
                 "AUROC (energy)": _cell(ctx, model, "trust", base + ("auroc", "energy"), DEC3),
+                "AUROC (byte entropy)": _cell(ctx, model, "trust", base + ("auroc", "byte_entropy"), DEC3),
                 "Abstained at 99% (%)": _cell(ctx, model, "trust", base + ("abstained", "0.99")),
                 "APS 95% set size": _cell(ctx, model, "trust", base + ("aps@0.95_sets", "mean_size"), DEC2),
                 "Most frequent prediction": f"{top_class} ({fmt(top[top_class])} %)" if top_class else "–",
@@ -215,7 +258,7 @@ def case_study(ctx: Context) -> Table | None:
             "Method": label,
             "Accuracy, all blocks (%)": fmt(t["all"]["accuracy"]),
             "Answered (%)": fmt(t["all"]["coverage@0.99"]),
-            "Accuracy of answers (%)": fmt(t["all"]["selective_accuracy@0.99"]),
+            "Accuracy of answers (%)": fmt_answers(t["all"]["selective_accuracy@0.99"]),
             "Answered, middle blocks (%)": fmt(lookup(t, ("middle", "coverage@0.99"))),
             "Accuracy, fragmented files (%)": fmt(lookup(t, ("fragmented", "accuracy"))),
             "APS 95% coverage (%)": fmt(t["all"]["aps@0.95_coverage"]),
@@ -228,7 +271,7 @@ def case_study(ctx: Context) -> Table | None:
             "Method": name,
             "Accuracy, all blocks (%)": fmt(s["all"]["correct_overall"]),
             "Answered (%)": fmt(s["all"]["coverage"]),
-            "Accuracy of answers (%)": fmt(s["all"]["accuracy_answered"]),
+            "Accuracy of answers (%)": fmt_answers(s["all"]["accuracy_answered"]),
             "Answered, middle blocks (%)": fmt(lookup(s, ("middle", "coverage"))),
             "Accuracy, fragmented files (%)": fmt(lookup(s, ("fragmented", "correct_overall"))),
             "APS 95% coverage (%)": "–",
@@ -256,8 +299,9 @@ def recalibration(ctx: Context) -> Table | None:
                 "Fitted on": "FFT-75 (transferred)" if params == "transferred" else f"{rec['cal_fraction']:.0%} of image files",
                 "T": _split_stat(m, "temperature", DEC2),
                 "Answered at 99% (%)": _split_stat(m, "coverage@0.99"),
-                "Accuracy of answers (%)": _split_stat(m, "selective_accuracy@0.99"),
+                "Accuracy of answers (%)": fmt_answers(m["selective_accuracy@0.99"]["mean"], m["selective_accuracy@0.99"]["std"]),
                 "Splits meeting 99% (%)": fmt(m["meets@0.99"]["mean"]),
+                "Splits with no answers at 99% (%)": fmt(lookup(m, ("no_answers@0.99", "mean"))),
                 "APS 95% coverage (%)": _split_stat(m, "aps@0.95_coverage"),
                 "APS 95% set size": _split_stat(m, "aps@0.95_size", DEC2),
             })
@@ -267,6 +311,7 @@ def recalibration(ctx: Context) -> Table | None:
 TABLES: dict[str, Callable[[Context], Table | None]] = {
     "dataset": dataset,
     "leakage": leakage,
+    "duplicates": duplicates,
     "main_results": main_results,
     "calibration": calibration,
     "selective": selective,

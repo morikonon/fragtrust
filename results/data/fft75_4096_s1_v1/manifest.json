@@ -1,0 +1,148 @@
+{
+  "name": "fft75_4096_s1_v1",
+  "created": "2026-11-27T17:11:30+00:00",
+  "git_commit": "f0544b8d8c9150919875270741a32c07fd5bd570-dirty",
+  "seed": 2026,
+  "block_size": 4096,
+  "class_names": [
+    "jpg",
+    "arw",
+    "cr2",
+    "dng",
+    "gpr",
+    "nef",
+    "nrw",
+    "orf",
+    "pef",
+    "raf",
+    "rw2",
+    "3fr",
+    "tiff",
+    "heic",
+    "bmp",
+    "gif",
+    "png",
+    "ai",
+    "eps",
+    "psd",
+    "mov",
+    "mp4",
+    "3gp",
+    "avi",
+    "mkv",
+    "ogv",
+    "webm",
+    "apk",
+    "jar",
+    "msi",
+    "dmg",
+    "7z",
+    "bz2",
+    "deb",
+    "gz",
+    "pkg",
+    "rar",
+    "rpm",
+    "xz",
+    "zip",
+    "exe",
+    "mach-o",
+    "elf",
+    "dll",
+    "doc",
+    "docx",
+    "key",
+    "ppt",
+    "pptx",
+    "xls",
+    "xlsx",
+    "djvu",
+    "epub",
+    "mobi",
+    "pdf",
+    "md",
+    "rtf",
+    "txt",
+    "tex",
+    "json",
+    "html",
+    "xml",
+    "log",
+    "csv",
+    "aiff",
+    "flac",
+    "m4a",
+    "mp3",
+    "ogg",
+    "wav",
+    "wma",
+    "pcap",
+    "ttf",
+    "dwg",
+    "sqlite"
+  ],
+  "class_names_source": "https://github.com/mittalgovind/fifty/blob/master/fifty/utilities/labels.json, key \"1\" (scenario 1); fetched 2026-11-22. Cross-check with the 'Human-readable labels' file on IEEE DataPort after download.",
+  "subset": {
+    "train_per_class": 20000,
+    "val_per_class": 4000,
+    "test_per_class": null
+  },
+  "sources": {
+    "train": {
+      "path": "data/raw/4k_1/train.npz",
+      "bytes": 20771582784,
+      "sha256": "8af587ede465cb682a9b3071a8302af0436d2b4b8f62fccf6972b309bbe9e9c6",
+      "x_key": "x",
+      "y_key": "y",
+      "rows": 6144000
+    },
+    "val": {
+      "path": "data/raw/4k_1/val.npz",
+      "bytes": 2597163525,
+      "sha256": "649ea1862bf117e445648941e4865641c557530ac155df998a4f4e23d5e08208",
+      "x_key": "x",
+      "y_key": "y",
+      "rows": 768000
+    },
+    "test": {
+      "path": "data/raw/4k_1/test.npz",
+      "bytes": 2597330303,
+      "sha256": "c4df205b8b1444ea9890490f78fb5759abe682daea9862f5716fb5907f5b7e1d",
+      "x_key": "x",
+      "y_key": "y",
+      "rows": 768000
+    }
+  },
+  "splits": {
+    "train": {
+      "rows": 1500000,
+      "source": "train",
+      "sha256": "3f83bf27268c910224246a2bc236a8f34c2840486e0c4bb82c4fa18fd9e147b9"
+    },
+    "val_a": {
+      "rows": 150000,
+      "source": "val",
+      "sha256": "e97850c196836547589af0ebd5ed9125d69f8f2f58df5a28057a5274620a427a"
+    },
+    "val_b": {
+      "rows": 150000,
+      "source": "val",
+      "sha256": "ed21ccf39fd4b5819e5c3840348d5de98f98e8c38d93a3d5c0a57a7474ae3660"
+    },
+    "test": {
+      "rows": 768000,
+      "source": "test",
+      "sha256": "86e2132ed45e559e1ce977ff90ddb7b098c5ff004bf926fdfb24b0fe58975274"
+    }
+  },
+  "probes": {
+    "ood_aes_ctr": {
+      "rows": 20000,
+      "description": "AES-256-CTR encryption of randomly chosen test blocks; one key, fresh random nonce per block"
+    },
+    "ood_random": {
+      "rows": 20000,
+      "description": "uniformly random bytes"
+    }
+  }
+}

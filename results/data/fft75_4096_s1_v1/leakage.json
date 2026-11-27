@@ -1,0 +1,22 @@
+{
+  "official_train_vs_test": {
+    "n_train": 6144000,
+    "n_test": 768000,
+    "test_in_train": 15942,
+    "test_in_train_frac": 0.0207578125,
+    "test_in_train_same_label": 15820,
+    "test_in_train_other_label_only": 122,
+    "test_in_train_constant_blocks": 1844,
+    "test_unique_frac": 0.9943841145833333
+  },
+  "subset_train_vs_test": {
+    "n_train": 1500000,
+    "n_test": 768000,
+    "test_in_train": 7513,
+    "test_in_train_frac": 0.009782552083333333,
+    "test_in_train_same_label": 7419,
+    "test_in_train_other_label_only": 94,
+    "test_in_train_constant_blocks": 1842,
+    "test_unique_frac": 0.9943841145833333
+  }
+}

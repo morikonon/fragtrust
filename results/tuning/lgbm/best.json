@@ -1,0 +1,16 @@
+{
+  "params": {
+    "num_leaves": 63,
+    "learning_rate": 0.05
+  },
+  "selected_by": "val_a_logloss",
+  "train_per_class": 5000,
+  "result": {
+    "num_leaves": 63,
+    "learning_rate": 0.05,
+    "best_iteration": 365,
+    "val_a_logloss": 1.0701923370361328,
+    "val_a_acc": 0.6978866666666667,
+    "seconds": 934.4
+  }
+}
